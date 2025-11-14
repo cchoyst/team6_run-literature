@@ -1,0 +1,1 @@
+必要なPythonライブラリの一覧（pip install -r用）

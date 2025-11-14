@@ -1,0 +1,12 @@
+構成例はこんな感じ
+
+├── app/                      # Python バックエンド (コアロジック)
+│   ├── __init__.py           # アプリケーション初期化
+│   ├── main.py               # サーバー起動ファイル、ルーティング定義
+│   ├── core/                 # 推薦ロジックの中核 (f_CRS)
+│   │   ├── llm_connector.py  # LLM APIとの通信 (Gemini APIなど)
+│   │   ├── retrieval_logic.py# 協調的検索のロジックを実装するモジュール
+│   │   ├── data_manager.py   # 過去の行動履歴(R)やアイテムデータの管理
+│   │   └── mood_chain.py     # 感情連鎖（MOOD_TO_THEME_LOGIC）のルール定義
+│   └── database/             # データベース連携モジュール
+│       └── firestore_manager.py # Firestoreへの接続・読み書き
