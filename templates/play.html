@@ -1,14 +1,289 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ここにページタイトルを記入</title>
-    
-    </head>
-<body>
-    <h1>メインの見出し</h1>
-    <p>最初の段落です。</p>
+    <title>走れ文学 - 作文用紙とメロス</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 日本語フォント設定 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #87CEEB; /* スカイブルー */
+            overflow: hidden; /* 全体のスクロールを禁止 */
+        }
 
-    </body>
+        /* ---------------------------------------------------- */
+        /* 作文用紙エリアのスタイル */
+        /* ---------------------------------------------------- */
+        .composition-paper {
+            width: 80%;
+            max-width: 900px;
+            height: 400px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #FFFFF0; /* クリーム色 */
+            border: 5px solid #F0E68C; /* 薄い金色の縁取り */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+            overflow: hidden; /* スクロールをJSで制御するため非表示 */
+            position: relative;
+        }
+
+        /* 縦書き設定 */
+        #story-container {
+            writing-mode: vertical-rl; /* 縦書き（右から左へ）*/
+            text-orientation: upright;
+            font-size: 1.5rem;
+            line-height: 2.5rem;
+            letter-spacing: 0.1rem;
+            color: #333;
+            /* テキストが出現する領域 */
+            height: 100%; 
+            width: fit-content; /* 内容の幅に合わせる */
+            white-space: pre-wrap; 
+            padding-left: 20px;
+            transform-origin: top right; /* 右上を基点にスクロール制御 */
+            transition: transform 0.5s ease-out; /* 段落送り時のアニメーション */
+        }
+        
+        .story-paragraph {
+            display: inline-block; /* 縦書きで段落を扱う */
+            margin-right: 2.5rem; /* 段落間のスペース */
+            padding-top: 10px; /* 見た目の調整 */
+            padding-bottom: 10px; /* 見た目の調整 */
+            min-height: 100%;
+            vertical-align: top;
+        }
+
+        /* ---------------------------------------------------- */
+        /* ステージエリアのスタイル */
+        /* ---------------------------------------------------- */
+        .stage-container {
+            width: 100%;
+            height: 200px;
+            position: fixed; /* 固定位置に修正 */
+            bottom: 0;
+            background-color: #008000; /* 濃い緑の地面 */
+        }
+
+        /* メロス（キャラクター）のスタイル */
+        #melos {
+            position: absolute;
+            bottom: 30px; /* 地面から少し浮かす */
+            left: 50px;
+            width: 50px;
+            height: 70px;
+            background-color: #FFD700; /* メロスカラー */
+            border-radius: 50%;
+            z-index: 10;
+            /* メロスの移動バグ修正のため、transitionを一時的に解除 */
+        }
+        
+        /* 渦巻（選択肢トリガー）のスタイル - 見やすい位置に修正 */
+        .vortex {
+            position: absolute;
+            bottom: 30px; 
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #8A2BE2 0%, #4B0082 100%);
+            box-shadow: 0 0 10px 5px #DA70D6;
+            z-index: 5;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        /* 渦巻のアニメーション */
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+        
+        /* 段落送りボタンのスタイル */
+        #next-paragraph-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #3B82F6; /* Blue-500 */
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 50; /* 作文用紙より上 */
+            transition: background-color 0.3s;
+        }
+        #next-paragraph-button:hover {
+            background-color: #2563EB; /* Blue-600 */
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 画面上部: 作文用紙エリア -->
+<div class="composition-paper">
+    <div id="story-container">
+        <!-- JSによって段落が動的に挿入される -->
+    </div>
+</div>
+
+<!-- 段落送りボタン -->
+<button id="next-paragraph-button" onclick="nextParagraph()">次の段落へ</button>
+
+<!-- 画面下部: ステージ/アクションエリア -->
+<div class="stage-container">
+    <div id="melos">
+        <span style="font-size: 20px; position: absolute; top: 0; left: 0; color: #333; transform: rotate(90deg);">メロス</span>
+    </div>
+    
+    <!-- 渦巻（選択肢トリガー）の例 -->
+    <div class="vortex" id="vortex-trigger" style="left: 650px;"></div>
+</div>
+
+<!-- 選択肢オーバーレイ（前回コードから省略 - 動作確認が目的） -->
+<div id="choice-overlay" style="display: none;">
+    <div class="choice-modal">
+        <h2 class="text-2xl font-bold mb-4 text-white">感情の渦：選択せよ</h2>
+        <p id="choice-context" class="mb-6 text-gray-300">（省略）</p>
+        <button onclick="hideChoices()">閉じる</button>
+    </div>
+</div>
+
+
+<script>
+    const storyData = [
+        "メロスは激怒した。必ず、かの邪智暴虐の王を葬らなければならぬと決意した。",
+        "メロスは、村の牧人である。笛を吹き、羊と遊んで暮らしてきた。けれども邪悪に対しては、人一倍に敏感であった。",
+        "きょう未明、メロスは村を出発し、野を越え山越え、十里の路を急いで走って来た。",
+        "メロスには父も、母も無い。妹と二人暮しだ。王は、都市を築き、大勢の臣民を苦しめている。",
+        "「走ることに意味がある。それが信頼だ。走れ、メロス！」",
+        "しかし、この走る行為が、彼の運命を大きく変えるとは、まだ知る由もなかった。彼は荒野を走り続ける中で、さまざまな文学の思想や感情の渦に引き込まれていくこととなる。",
+        "メロスは再び立ち上がり、決意を新たにした。彼の視線の先に、奇妙な渦巻が現れる。",
+        // 以下、ダミーの選択肢後の展開
+        "【物語の連鎖】メロスは「不安と美が入り混じった香りだった」と呟いた。彼は今、梶井基次郎の『檸檬』の世界にいる。"
+    ];
+
+    const storyContainer = document.getElementById('story-container');
+    const nextButton = document.getElementById('next-paragraph-button');
+    const melos = document.getElementById('melos');
+    
+    let currentParagraphIndex = 0;
+    let currentCharacterIndex = 0;
+    let typingIntervalId = null;
+
+    let melosPositionX = 50;
+    const melosSpeed = 10;
+    let animationFrameId = null;
+
+    /**
+     * メロスの移動バグの修正
+     * メロスのCSS定義が不完全だったため、`requestAnimationFrame` を使って位置更新を行う
+     */
+    function updateMelosPosition() {
+        melos.style.left = `${melosPositionX}px`;
+        // 作文用紙の縦書きメロスアイコンを調整
+        melos.style.transform = `translateX(${melosPositionX - 50}px)`;
+
+        // 渦巻との衝突判定（デモのため省略）
+        
+        animationFrameId = requestAnimationFrame(updateMelosPosition);
+    }
+    
+    /**
+     * タイプライターエフェクトの開始
+     */
+    function startTyping(text) {
+        if (typingIntervalId) clearInterval(typingIntervalId);
+        
+        const currentParagraphDiv = document.createElement('div');
+        currentParagraphDiv.className = 'story-paragraph';
+        storyContainer.appendChild(currentParagraphDiv);
+
+        let textToDisplay = '';
+        currentCharacterIndex = 0;
+        
+        typingIntervalId = setInterval(() => {
+            if (currentCharacterIndex < text.length) {
+                // 文字を一つずつ追加
+                textToDisplay += text.charAt(currentCharacterIndex);
+                currentParagraphDiv.textContent = textToDisplay;
+                currentCharacterIndex++;
+            } else {
+                // 全て表示し終わったらインターバルをクリアし、ボタンを有効化
+                clearInterval(typingIntervalId);
+                typingIntervalId = null;
+                nextButton.disabled = false;
+                nextButton.textContent = '次の段落へ';
+            }
+        }, 100); // 100msごとに文字を出力
+        
+        nextButton.disabled = true; // タイピング中はボタン無効
+        nextButton.textContent = '表示中...';
+
+        // 作文用紙のスクロール位置を調整
+        // 新しい段落が表示されるように、コンテナ全体を左に移動させる
+        storyContainer.style.transform = `translateX(-${storyContainer.scrollWidth - storyContainer.clientWidth}px)`;
+    }
+
+    /**
+     * 次の段落へ進む（ボタン操作）
+     */
+    window.nextParagraph = function() {
+        if (currentParagraphIndex < storyData.length) {
+            currentParagraphIndex++;
+            startTyping(storyData[currentParagraphIndex - 1]);
+        } else {
+            nextButton.textContent = '物語は終了しました';
+            nextButton.disabled = true;
+            alert('ゲーム終了処理へ移行（実装予定）');
+        }
+    }
+
+    /**
+     * キーボード入力処理（メロスの移動）
+     */
+    document.addEventListener('keydown', (event) => {
+        // 選択肢オーバーレイがないことを確認（デモでは省略）
+        
+        let moved = false;
+        const stageWidth = document.querySelector('.stage-container').clientWidth;
+        const melosWidth = melos.clientWidth;
+
+        if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') {
+            // 左移動
+            melosPositionX = Math.max(melosPositionX - melosSpeed, 10);
+            moved = true;
+        } else if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') {
+            // 右移動
+            melosPositionX = Math.min(melosPositionX + melosSpeed, stageWidth - melosWidth - 10);
+            moved = true;
+        }
+        
+        // requestAnimationFrameで位置更新が継続的に行われるため、手動更新は不要
+        if (moved) {
+            // 衝突判定をトリガー（本来のゲームロジック）
+            // checkCollision();
+        }
+    });
+
+    // 初期化とゲーム開始
+    function initializeGame() {
+        // メロスの位置更新アニメーションを開始
+        updateMelosPosition();
+        
+        nextButton.textContent = '物語を始める';
+        nextButton.disabled = false;
+    }
+    
+    // ウィンドウロード時にゲームを開始
+    initializeGame();
+    
+    // ダミーの選択肢非表示関数（必須ではないがエラー回避用）
+    function hideChoices() {
+        document.getElementById('choice-overlay').style.display = 'none';
+    }
+</script>
+
+</body>
 </html>
