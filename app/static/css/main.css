@@ -1,0 +1,317 @@
+#【ずれているので変更する】
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN",
+               system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #6fd0ff;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* レーンの縦位置と道の太さ */
+:root {
+  --lane-top: 32%;
+  --lane-middle: 52%;
+  --lane-bottom: 72%;
+  --road-thick: 16%;
+}
+
+/* -------------------------
+   レイアウト
+   ------------------------- */
+.game-body {
+  background: #6fd0ff;
+}
+
+.game-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+
+/* ヘッダー */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.game-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.game-status {
+  font-size: 13px;
+  color: #155a1b;
+  display: flex;
+  gap: 8px;
+}
+
+
+/* 空と雲（画像） */
+.game-sky {
+  height: 70px;
+  background: #8fdcff;
+  border-radius: 8px 8px 0 0;
+  border: 3px solid #4ba3d9;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cloud-row {
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cloud-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+
+
+/* -------------------------
+   ステージ（地面＋道＋土管）
+   ------------------------- */
+.game-stage {
+  position: relative;
+  background: #55b54e;
+  border-radius: 0 0 16px 16px;
+  border: 3px solid #3e8a37;
+  border-top: none;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 48%;           /* 高さ:幅 ≒ 0.48 */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+}
+
+.stage-bg-css {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+
+
+/* オレンジの道 */
+.road {
+  position: absolute;
+  background: #bf5b1f;
+}
+
+
+/* 中央のまっすぐな道（左→分岐点） */
+.main-road {
+  left: 0;
+  width: 36%;
+  height: var(--road-thick);
+  top: var(--lane-middle);
+  transform: translateY(-50%);
+}
+
+/* 分岐する道（上・下） */
+.branch-road {
+  left: 36%;
+  width: 28%;
+  height: var(--road-thick);
+  transform-origin: left center;
+  border-radius: 999px;
+}
+
+.branch-top {
+  top: var(--lane-middle);
+  transform: translateY(-85%) rotate(-18deg);
+}
+
+.branch-bottom {
+  top: var(--lane-middle);
+  transform: translateY(85%) rotate(18deg);
+}
+
+
+/* 土管 */
+.pipe {
+  position: absolute;
+  width: 7%;
+  height: auto;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* 右側3本：それぞれのレーンの中心 */
+.pipe-right {
+  left: 64%; 
+}
+
+.pipe-top {
+  top: var(--lane-top);
+}
+
+.pipe-middle {
+  top: var(--lane-middle);
+}
+
+.pipe-bottom {
+  top: var(--lane-bottom);
+}
+
+
+
+/* -------------------------
+   メロス（中央レーンを走る）
+------------------------- */
+.runner {
+  position: absolute;
+  top: var(--lane-middle);
+  left: -15%;
+  width: 60px;
+  height: auto;
+  transform: translateY(-50%);
+  z-index: 2;
+  animation: run-melos 4s ease-out forwards;
+}
+
+@keyframes run-melos {
+  0% {
+    left: -15%;
+  }
+  100% {
+    left: 36%;
+  }
+}
+
+
+/* -------------------------
+   選択肢カード（土管の右横）
+   ------------------------- */
+.option-form {
+  position: absolute;
+  width: 28%;
+  left: 72%;
+  z-index: 2;
+}
+
+/* レーンと同じ高さに揃える */
+.slot-top {
+  top: var(--lane-top);
+}
+.slot-middle {
+  top: var(--lane-middle);
+}
+.slot-bottom {
+  top: var(--lane-bottom);
+}
+
+
+/* カード */
+.speech-bubble {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 2px solid #258037;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.speech-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+
+/* アイコン＋テキスト横並び */
+.option-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.option-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.option-text {
+  flex: 1;
+  text-align: left;
+  white-space: normal;
+}
+
+
+
+/* -------------------------
+   フッター
+   ------------------------- */
+.game-footer {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.restart-button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid #2f6cad;
+  background: #ffffff;
+  color: #2f6cad;
+  cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.restart-button:hover {
+  background: #2f6cad;
+  color: #ffffff;
+}
+
+
+
+@media (max-width: 768px) {
+  .game-wrapper {
+    padding: 8px;
+  }
+
+  .game-title {
+    font-size: 18px;
+  }
+
+  .game-status {
+    font-size: 12px;
+  }
+
+  .option-form {
+    width: 60%;
+    left: 38%;
+  }
+
+  .speech-bubble {
+    font-size: 13px;
+  }
+
+  .option-icon {
+    width: 32px;
+    height: 32px;
+  }
+}

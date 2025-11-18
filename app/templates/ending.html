@@ -1,0 +1,39 @@
+# 暫定版  
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>エンディング</title>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="game-body">
+<div class="game-wrapper">
+
+  <h1 class="game-title">エンディング</h1>
+
+  <section class="ending-panel">
+    <p class="ending-main">
+      あなたの最終的な感情は
+      <strong>{{ final_label }}</strong>
+      （コード: <code>{{ final_mood }}</code>）
+      でした。
+    </p>
+
+    {% if history %}
+      <p class="ending-sub">
+        これまでの気分の変化:
+        {{ history | join(" → ") }}
+      </p>
+    {% endif %}
+  </section>
+
+  <form method="get" action="{{ url_for('index') }}">
+    <button type="submit" class="restart-button">
+      もう一度あそぶ
+    </button>
+  </form>
+
+</div>
+</body>
+</html>

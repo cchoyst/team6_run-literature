@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>走れ文学</title>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="game-body">
+
+<div class="game-wrapper">
+
+  <!-- ヘッダー -->
+  <header class="game-header">
+    <h1 class="game-title">走れ文学</h1>
+    <div class="game-status">
+      <span>ターン: {{ turn }}</span>
+      <!-- 【本番環境では消す】 -->
+      <span>気分: {{ mood }}</span>
+    </div>
+  </header>
+
+  <!-- 空と雲 -->
+  <div class="game-sky">
+    <div class="cloud-row">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.jpg') }}"
+           alt="" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.jpg') }}"
+           alt="" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.jpg') }}"
+           alt="" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.jpg') }}"
+           alt="" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.jpg') }}"
+           alt="" class="cloud-img">
+    </div>
+  </div>
+
+  <!-- ステージ本体 -->
+  <div class="game-stage">
+
+    <!-- 背景 -->
+    <div class="stage-bg-css">
+      <!-- 道 -->
+      <div class="road main-road"></div>
+      <div class="road branch-road branch-top"></div>
+      <div class="road branch-road branch-bottom"></div>
+
+      <!-- 土管3本 -->
+      <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
+           alt="" class="pipe pipe-right pipe-top">
+      <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
+           alt="" class="pipe pipe-right pipe-middle">
+      <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
+           alt="" class="pipe pipe-right pipe-bottom">
+    </div>
+
+    <!-- メロス（中央を走る） -->
+    <img src="{{ url_for('static', filename='assets/characters/Melos.jpg') }}"
+         alt="メロス" class="runner">
+
+    <!-- 選択肢（上） -->
+    {% if options|length > 0 %}
+    <form method="post"
+          action="{{ url_for('choose') }}"
+          class="option-form slot-top">
+      <input type="hidden" name="selected_mood"
+             value="{{ options[0]['next_mood'] }}">
+      <button type="submit" class="speech-bubble">
+        <span class="option-content">
+          <img class="option-icon"
+               src="{{ url_for('static',
+                               filename='assets/characters/' ~ options[0]['icon_filename']) }}"
+               alt="">
+          <span class="option-text">
+            {{ options[0]['text'] }}
+          </span>
+        </span>
+      </button>
+    </form>
+    {% endif %}
+
+    <!-- ▼ 選択肢（中央） -->
+    {% if options|length > 1 %}
+    <form method="post"
+          action="{{ url_for('choose') }}"
+          class="option-form slot-middle">
+      <input type="hidden" name="selected_mood"
+             value="{{ options[1]['next_mood'] }}">
+      <button type="submit" class="speech-bubble">
+        <span class="option-content">
+          <img class="option-icon"
+               src="{{ url_for('static',
+                               filename='assets/characters/' ~ options[1]['icon_filename']) }}"
+               alt="">
+          <span class="option-text">
+            {{ options[1]['text'] }}
+          </span>
+        </span>
+      </button>
+    </form>
+    {% endif %}
+
+    <!-- ▼ 選択肢（下） -->
+    {% if options|length > 2 %}
+    <form method="post"
+          action="{{ url_for('choose') }}"
+          class="option-form slot-bottom">
+      <input type="hidden" name="selected_mood"
+             value="{{ options[2]['next_mood'] }}">
+      <button type="submit" class="speech-bubble">
+        <span class="option-content">
+          <img class="option-icon"
+               src="{{ url_for('static',
+                               filename='assets/characters/' ~ options[2]['icon_filename']) }}"
+               alt="">
+          <span class="option-text">
+            {{ options[2]['text'] }}
+          </span>
+        </span>
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- フッター -->
+  <footer class="game-footer">
+    <form method="get" action="{{ url_for('index') }}">
+      <button type="submit" class="restart-button">
+        タイトルに戻る
+      </button>
+    </form>
+  </footer>
+
+</div>
+</body>
+</html>

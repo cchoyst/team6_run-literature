@@ -234,9 +234,8 @@
             currentParagraphIndex++;
             startTyping(storyData[currentParagraphIndex - 1]);
         } else {
-            nextButton.textContent = '物語は終了しました';
-            nextButton.disabled = true;
-            alert('ゲーム終了処理へ移行（実装予定）');
+            // 物語を読み終えたら、選択肢画面（/game）へ遷移
+            window.location.href = "{{ url_for('game') }}";
         }
     }
 
