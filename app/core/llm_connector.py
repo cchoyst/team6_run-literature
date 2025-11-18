@@ -1,0 +1,1 @@
+# LLM APIとの通信 (Gemini APIなど)

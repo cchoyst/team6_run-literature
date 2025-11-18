@@ -1,3 +1,5 @@
+# 感情連鎖（MOOD_TO_THEME_LOGIC）のルール定義
+
 import csv
 import random
 import os

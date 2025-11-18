@@ -1,3 +1,4 @@
+# サーバー起動ファイル、ルーティング定義
 import os
 import json
 import requests
