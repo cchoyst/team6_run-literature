@@ -1,4 +1,5 @@
 # LLM APIとの通信 (Gemini APIなど)
+# 【応答が遅いから変える】
 import os
 import json
 import re
@@ -46,7 +47,7 @@ SYSTEM_MSG = """
 
 
 def _extract_text(response: Any) -> str:
-    """Gemini 応答からテキストだけ取り出す（安全版）。"""
+    """Gemini 応答からテキストだけを取り出す"""
     text = getattr(response, "text", None)
     if text:
         return text.strip()
