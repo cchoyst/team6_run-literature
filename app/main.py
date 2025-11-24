@@ -1,3 +1,4 @@
+#実行コード：python -m app.main
 # サーバー起動ファイル、ルーティング定義
 import os
 import json

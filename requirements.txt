@@ -1,1 +1,2 @@
-必要なPythonライブラリの一覧（pip install -r用）
+#必要なPythonライブラリの一覧（pip install -r requirements.txt）
+pandas

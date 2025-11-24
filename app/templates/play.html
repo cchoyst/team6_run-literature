@@ -70,15 +70,11 @@
         /* メロス（キャラクター）のスタイル */
         #melos {
             position: absolute;
-            bottom: 30px; /* 地面から少し浮かす */
+            bottom: 30px;
             left: 50px;
-            width: 50px;
-            height: 70px;
-            background-color: #FFD700; /* メロスカラー */
-            border-radius: 50%;
             z-index: 10;
-            /* メロスの移動バグ修正のため、transitionを一時的に解除 */
         }
+
         
         /* 渦巻（選択肢トリガー）のスタイル - 見やすい位置に修正 */
         .vortex {
@@ -134,7 +130,9 @@
 <!-- 画面下部: ステージ/アクションエリア -->
 <div class="stage-container">
     <div id="melos">
-        <span style="font-size: 20px; position: absolute; top: 0; left: 0; color: #333; transform: rotate(90deg);">メロス</span>
+        <img src="{{ url_for('static', filename='assets/characters/Melos.jpg') }}"
+        alt="メロス"
+        style="width: 80px; height: auto; user-select: none;">
     </div>
     
     <!-- 渦巻（選択肢トリガー）の例 -->
