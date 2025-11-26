@@ -156,131 +156,133 @@
         "きょう未明、メロスは村を出発し、野を越え山越え、十里の路を急いで走って来た。",
         "メロスには父も、母も無い。妹と二人暮しだ。王は、都市を築き、大勢の臣民を苦しめている。",
         "「走ることに意味がある。それが信頼だ。走れ、メロス！」",
-        "しかし、この走る行為が、彼の運命を大きく変えるとは、まだ知る由もなかった。彼は荒野を走り続ける中で、さまざまな文学の思想や感情の渦に引き込まれていくこととなる。",
-        "メロスは再び立ち上がり、決意を新たにした。彼の視線の先に、奇妙な渦巻が現れる。",
-        // 以下、ダミーの選択肢後の展開
-        "【物語の連鎖】メロスは「不安と美が入り混じった香りだった」と呟いた。彼は今、梶井基次郎の『檸檬』の世界にいる。"
+        "しかし、この走る行為が、彼の運命を大きく変えるとは、まだ知る由もなかった。",
+        "メロスは再び立ち上がり、決意を新たにした。視線の先に奇妙な渦巻が現れる。",
+        "【物語の連鎖】メロスは檸檬の世界へ引き込まれていった。"
     ];
 
-    const storyContainer = document.getElementById('story-container');
-    const nextButton = document.getElementById('next-paragraph-button');
-    const melos = document.getElementById('melos');
-    
+    const storyContainer = document.getElementById("story-container");
+    const nextButton = document.getElementById("next-paragraph-button");
+    const melos = document.getElementById("melos");
+    const vortex = document.getElementById("vortex-trigger");
+
     let currentParagraphIndex = 0;
     let currentCharacterIndex = 0;
     let typingIntervalId = null;
 
     let melosPositionX = 50;
     const melosSpeed = 10;
-    let animationFrameId = null;
 
-    /**
-     * メロスの移動バグの修正
-     * メロスのCSS定義が不完全だったため、`requestAnimationFrame` を使って位置更新を行う
-     */
+    /* ----------------------------------------------- */
+    /* メロス移動アニメーション                        */
+    /* ----------------------------------------------- */
     function updateMelosPosition() {
         melos.style.left = `${melosPositionX}px`;
-        // 作文用紙の縦書きメロスアイコンを調整
-        melos.style.transform = `translateX(${melosPositionX - 50}px)`;
-
-        // 渦巻との衝突判定（デモのため省略）
-        
-        animationFrameId = requestAnimationFrame(updateMelosPosition);
+        requestAnimationFrame(updateMelosPosition);
+        checkCollision();  // ← 毎フレーム当たり判定
     }
-    
-    /**
-     * タイプライターエフェクトの開始
-     */
+
+    /* ----------------------------------------------- */
+    /* タイピング処理                                   */
+    /* ----------------------------------------------- */
     function startTyping(text) {
         if (typingIntervalId) clearInterval(typingIntervalId);
-        
-        const currentParagraphDiv = document.createElement('div');
-        currentParagraphDiv.className = 'story-paragraph';
-        storyContainer.appendChild(currentParagraphDiv);
 
-        let textToDisplay = '';
+        const paraDiv = document.createElement("div");
+        paraDiv.className = "story-paragraph";
+        storyContainer.appendChild(paraDiv);
+
+        let displayed = "";
         currentCharacterIndex = 0;
-        
+
         typingIntervalId = setInterval(() => {
             if (currentCharacterIndex < text.length) {
-                // 文字を一つずつ追加
-                textToDisplay += text.charAt(currentCharacterIndex);
-                currentParagraphDiv.textContent = textToDisplay;
+                displayed += text[currentCharacterIndex];
+                paraDiv.textContent = displayed;
                 currentCharacterIndex++;
             } else {
-                // 全て表示し終わったらインターバルをクリアし、ボタンを有効化
                 clearInterval(typingIntervalId);
                 typingIntervalId = null;
                 nextButton.disabled = false;
-                nextButton.textContent = '次の段落へ';
+                nextButton.textContent = "次の段落へ";
             }
-        }, 100); // 100msごとに文字を出力
-        
-        nextButton.disabled = true; // タイピング中はボタン無効
-        nextButton.textContent = '表示中...';
+        }, 100);
 
-        // 作文用紙のスクロール位置を調整
-        // 新しい段落が表示されるように、コンテナ全体を左に移動させる
-        storyContainer.style.transform = `translateX(-${storyContainer.scrollWidth - storyContainer.clientWidth}px)`;
+        nextButton.disabled = true;
+        nextButton.textContent = "表示中...";
     }
 
-    /**
-     * 次の段落へ進む（ボタン操作）
-     */
-    window.nextParagraph = function() {
+    /* ----------------------------------------------- */
+    /* 次の段落へ                                       */
+    /* ----------------------------------------------- */
+    window.nextParagraph = function () {
         if (currentParagraphIndex < storyData.length) {
+            startTyping(storyData[currentParagraphIndex]);
             currentParagraphIndex++;
-            startTyping(storyData[currentParagraphIndex - 1]);
         } else {
-            // 物語を読み終えたら、選択肢画面（/game）へ遷移
+            /* ★ 全部読み終わったら /game に飛ぶ */
             window.location.href = "{{ url_for('game') }}";
         }
-    }
+    };
 
-    /**
-     * キーボード入力処理（メロスの移動）
-     */
-    document.addEventListener('keydown', (event) => {
-        // 選択肢オーバーレイがないことを確認（デモでは省略）
-        
-        let moved = false;
-        const stageWidth = document.querySelector('.stage-container').clientWidth;
+    /* ----------------------------------------------- */
+    /* キー入力：メロス移動                             */
+    /* ----------------------------------------------- */
+    document.addEventListener("keydown", (event) => {
+        const stageWidth = document.querySelector(".stage-container").clientWidth;
         const melosWidth = melos.clientWidth;
 
-        if (event.key === 'a' || event.key === 'A' || event.key === 'ArrowLeft') {
-            // 左移動
-            melosPositionX = Math.max(melosPositionX - melosSpeed, 10);
-            moved = true;
-        } else if (event.key === 'd' || event.key === 'D' || event.key === 'ArrowRight') {
-            // 右移動
-            melosPositionX = Math.min(melosPositionX + melosSpeed, stageWidth - melosWidth - 10);
-            moved = true;
+        if (event.key === "a" || event.key === "A" || event.key === "ArrowLeft") {
+            melosPositionX = Math.max(melosPositionX - melosSpeed, 0);
         }
-        
-        // requestAnimationFrameで位置更新が継続的に行われるため、手動更新は不要
-        if (moved) {
-            // 衝突判定をトリガー（本来のゲームロジック）
-            // checkCollision();
+        if (event.key === "d" || event.key === "D" || event.key === "ArrowRight") {
+            melosPositionX = Math.min(melosPositionX + melosSpeed, stageWidth - melosWidth);
         }
     });
 
-    // 初期化とゲーム開始
+    /* ----------------------------------------------- */
+    /* ★ 当たり判定（メロス × 渦巻）                     */
+    /* ----------------------------------------------- */
+    function checkCollision() {
+        const melosRect = melos.getBoundingClientRect();
+        const vortexRect = vortex.getBoundingClientRect();
+
+        const hit =
+            melosRect.right > vortexRect.left &&
+            melosRect.left < vortexRect.right &&
+            melosRect.bottom > vortexRect.top &&
+            melosRect.top < vortexRect.bottom;
+
+        if (hit) {
+            showChoiceOverlay();
+        }
+    }
+
+    /* ----------------------------------------------- */
+    /* ★ 渦巻に触れたときのダミー選択肢画面表示           */
+    /* （今は閉じるだけでもOK）                          */
+    /* ----------------------------------------------- */
+    function showChoiceOverlay() {
+        const overlay = document.getElementById("choice-overlay");
+        overlay.style.display = "flex";
+    }
+
+    window.hideChoices = function () {
+        document.getElementById("choice-overlay").style.display = "none";
+    };
+
+    /* ----------------------------------------------- */
+    /* 初期化                                           */
+    /* ----------------------------------------------- */
     function initializeGame() {
-        // メロスの位置更新アニメーションを開始
         updateMelosPosition();
-        
-        nextButton.textContent = '物語を始める';
+        nextButton.textContent = "物語を始める";
         nextButton.disabled = false;
     }
-    
-    // ウィンドウロード時にゲームを開始
+
     initializeGame();
-    
-    // ダミーの選択肢非表示関数（必須ではないがエラー回避用）
-    function hideChoices() {
-        document.getElementById('choice-overlay').style.display = 'none';
-    }
 </script>
+
 
 </body>
 </html>
