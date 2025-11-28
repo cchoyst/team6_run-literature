@@ -150,16 +150,9 @@
 
 
 <script>
-    const storyData = [
-        "メロスは激怒した。必ず、かの邪智暴虐の王を葬らなければならぬと決意した。",
-        "メロスは、村の牧人である。笛を吹き、羊と遊んで暮らしてきた。けれども邪悪に対しては、人一倍に敏感であった。",
-        "きょう未明、メロスは村を出発し、野を越え山越え、十里の路を急いで走って来た。",
-        "メロスには父も、母も無い。妹と二人暮しだ。王は、都市を築き、大勢の臣民を苦しめている。",
-        "「走ることに意味がある。それが信頼だ。走れ、メロス！」",
-        "しかし、この走る行為が、彼の運命を大きく変えるとは、まだ知る由もなかった。",
-        "メロスは再び立ち上がり、決意を新たにした。視線の先に奇妙な渦巻が現れる。",
-        "【物語の連鎖】メロスは檸檬の世界へ引き込まれていった。"
-    ];
+    let storyData = [];                // ← 空で開始
+    let storyLoaded = false;  
+
 
     const storyContainer = document.getElementById("story-container");
     const nextButton = document.getElementById("next-paragraph-button");
@@ -274,7 +267,20 @@
     /* ----------------------------------------------- */
     /* 初期化                                           */
     /* ----------------------------------------------- */
-    function initializeGame() {
+    async function loadStoryJson() {
+        try {
+            const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
+            const jsonData = await response.json();
+            storyData = jsonData.story || [];
+            storyLoaded = true;
+            console.log("JSON ストーリー読み込み完了:", storyData);
+        } catch (error) {
+            console.error("JSON 読み込みエラー:", error);
+        }
+    }
+
+    async function initializeGame() {
+        await loadStoryJson();     // ← 追加：先にJSON読み込む
         updateMelosPosition();
         nextButton.textContent = "物語を始める";
         nextButton.disabled = false;

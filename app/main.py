@@ -180,10 +180,27 @@ def get_next_choices():
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 2: LLMによる場面の橋渡しテキスト生成
 # ----------------------------------------------------------------------------------
+STORY_PATH = "data/story.json"
+
+def load_story():
+    """story.json を読み込む（無かったら初期化）"""
+    if not os.path.exists(STORY_PATH):
+        return {"story": []}
+    with open(STORY_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_story(story_data):
+    """story.json に保存する"""
+    with open(STORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(story_data, f, ensure_ascii=False, indent=2)
+
+
 @app.route('/api/generate_scene_text', methods=['POST'])
 def generate_scene_text():
     """
-    プレイヤーの選択と次のテーマに基づき、LLMが次の場面への物語の橋渡しテキストを生成する。
+    プレイヤーの選択と次のテーマ、さらに story.json の履歴を踏まえて
+    物語の続きを生成し、段落ごとに保存する
     """
     if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_FALLBACK_API_KEY":
         return jsonify({"error": "Gemini API key is not configured on the server."}), 503
@@ -195,16 +212,25 @@ def generate_scene_text():
         next_theme = data.get('next_theme', '友情')
         current_work = data.get('current_work', '走れメロス')
 
+        ### 追加：これまでのストーリー読み込み
+        story_data = load_story()
+        previous_story = "\n".join(story_data["story"])  # LLM 用にまとめる
+
         system_instruction = (
-            "あなたは物語の語り手である。主人公メロスは、今「走れメロス」から離れて、他の文学作品の世界へ引き込まれている。"
-            f"直前のメロスの行動は、セリフ「{chosen_text}」（作品：{current_work}、感情：{chosen_mood}）を選んだことである。"
-            f"この選択により、物語の主題は「{next_theme}」に急激に変化する。"
-            "この急な変化を繋ぎ合わせる、自然で文学的な橋渡しのテキストを生成せよ。"
-            "**縦書きの作文用紙に合うよう、一行あたりの文字数を少なくし、改行を多く用いること。**"
-            "生成する文章は、**新たな場面への導入（150字程度）**に留めること。"
+            "あなたは物語の語り手です。"
+            "以下はこれまでのストーリー全体です：\n"
+            f"{previous_story}\n\n"
+            "主人公メロスは、今「走れメロス」から離れて別作品の世界へ向かう。"
+            f"直前のメロスの選択は「{chosen_text}」（作品：{current_work}, 感情：{chosen_mood}）である。"
+            f"次の主題は「{next_theme}」である。\n"
+            "この流れを自然につなぐ新しい段落を 150字以内で生成せよ。"
+            "縦書きに向くように改行を含めてもよい。"
+            "段落は1つだけ生成し、決して長編にしない。"
         )
+
         user_prompt = (
-            f"メロスが「{chosen_text}」と発言した。彼の目の前に新たな情景が広がる。次の主題は「{next_theme}」である。この場面転換を描写せよ。"
+            f"メロスが「{chosen_text}」と言った。次の主題は「{next_theme}」。"
+            "この場面転換をつなぐ新しい段落を生成してください。"
         )
 
         payload = {
@@ -213,23 +239,27 @@ def generate_scene_text():
         }
         
         response = requests.post(f"{GEMINI_API_URL}?key={GEMINI_API_KEY}", json=payload)
-        response.raise_for_status() 
-        
+        response.raise_for_status()
+
         result = response.json()
         scene_text = result['candidates'][0]['content']['parts'][0]['text']
 
-        # LLM生成テキストと次の感情（選択されたもの）を返す
+        ### 追加：段落として JSON に追加
+        new_paragraph = scene_text.strip()
+        story_data["story"].append(new_paragraph)
+
+        ### 追加：保存
+        save_story(story_data)
+
         return jsonify({
-            "scene_text": scene_text,
-            "next_mood": chosen_mood # 選んだセリフのMoodを次のターンの入力として使う
+            "scene_text": new_paragraph,
+            "next_mood": chosen_mood
         })
 
     except requests.exceptions.RequestException as e:
-        app.logger.error(f"Gemini API Request Error: {e}")
         return jsonify({"error": "Gemini APIとの通信に失敗しました。", "details": str(e)}), 500
     except Exception as e:
-        app.logger.error(f"Error generating scene text: {e}")
-        return jsonify({"error": "場面生成中に予期せぬエラーが発生しました。", "details": str(e)}), 500
+        return jsonify({"error": "場面生成中に予期せぬエラー。", "details": str(e)}), 500
 
 
 # ----------------------------------------------------------------------------------
