@@ -180,11 +180,16 @@ def ending():
     final_label = EMOTION_LABELS.get(final_mood, final_mood)
     history = session.get("history", [])
 
+    story_data = load_story()
+    story_list = story_data.get("story", [])
+    story_text = "\n".join(story_list)
+
     return render_template(
         "ending.html",
-        final_mood=final_mood,    # hope・neutral など
-        final_label=final_label,  # 希望・ふつう など
-        history=history,          # 途中の mood 遷移 【あとで確認】
+        final_label=final_label, # 希望・ふつう など
+        final_mood=final_mood,   # hope・neutral など
+        history=history,         # 途中の mood 遷移 【あとで確認】
+        story_text=story_text    # story
     )
 
 
