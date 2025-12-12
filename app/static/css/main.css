@@ -315,3 +315,81 @@ button {
     height: 32px;
   }
 }
+
+
+/* 1. 縦書き文学背景のスタイル */
+.literary-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* bodyより上、コンテンツより奥 */
+  
+  /* 縦書き設定 */
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  
+  /* 背景色と文字設定 */
+  background-color: #fcfaf2; /* 和紙っぽい色（ゲーム画面の青を上書き） */
+  color: #000;
+  opacity: 0.15; /* 文字を薄く透かす */
+  font-family: "Yu Mincho", "HiraMinProN-W3", serif; /* 明朝体 */
+  font-size: 24px;
+  line-height: 2.0;
+  padding: 20px;
+  
+  /* はみ出し防止と選択不可 */
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  white-space: pre-wrap;
+  text-align: justify;
+}
+
+/* 2. タイトル画面のコンテナ（白い箱） */
+.start-container {
+  position: relative;
+  z-index: 1; /* 背景より手前に表示 */
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px 60px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  margin: 10vh auto; /* 上下の余白 */
+  backdrop-filter: blur(5px);
+}
+
+.start-container h1 {
+  font-size: 3.5em;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+/* 3. タイトル画面のメニューボタン */
+.menu-item {
+  margin: 20px 0;
+}
+
+.menu-item a {
+  display: inline-block;
+  padding: 15px 40px;
+  font-size: 1.8em;
+  color: #fff;
+  background-color: #3498db;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+}
+
+.menu-item a:hover {
+  background-color: #2980b9;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
