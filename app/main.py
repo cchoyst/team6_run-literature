@@ -181,8 +181,17 @@ def ending():
     history = session.get("history", [])
 
     story_data = load_story()
-    story_list = story_data.get("story", [])
-    story_text = "\n".join(story_list)
+    generated_story = story_data.get("story", [])
+
+    # ★ プレイ開始時の固定ストーリー（initialStory)
+    initial_story = [
+        "メロスは激怒した。",
+        "ここではエピローグを表示。１ターン目なら選択肢画面その後は追加ストーリーを表示します。"
+    ]
+
+    # ★ 全ストーリー結合
+    full_story = initial_story + generated_story
+    story_text = "\n".join(full_story)
 
     return render_template(
         "ending.html",
