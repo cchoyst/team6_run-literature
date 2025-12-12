@@ -333,7 +333,7 @@ button {
   /* 背景色と文字設定 */
   background-color: #fcfaf2; /* 和紙っぽい色（ゲーム画面の青を上書き） */
   color: #000;
-  opacity: 0.15; /* 文字を薄く透かす */
+  opacity: 0.30; /* 文字を薄く透かす */
   font-family: "Yu Mincho", "HiraMinProN-W3", serif; /* 明朝体 */
   font-size: 24px;
   line-height: 2.0;
