@@ -264,13 +264,18 @@
     };
 
     /* ----------------------------------------------- */
-    /* 初期化                                           */
+    /* 初期化：JSON 読み込み ＋ プロローグ結合            */
     /* ----------------------------------------------- */
+    const initialStory = [
+        "メロスは激怒した。",
+        "ここではエピローグを表示。１ターン目なら選択肢画面その後は追加ストーリーを表示します。"
+    ];
+
     async function loadStoryJson() {
         try {
             const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
             const jsonData = await response.json();
-            storyData = jsonData.story || [];
+            storyData = initialStory.concat(jsonData.story);
             storyLoaded = true;
             console.log("JSON ストーリー読み込み完了:", storyData);
         } catch (error) {

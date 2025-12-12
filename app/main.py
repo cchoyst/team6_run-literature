@@ -82,7 +82,6 @@ def start_game():
     session["current_mood"] = "neutral"
     return redirect(url_for("play"))
 
-
 # play.html（メロスが走る画面）
 @app.route("/play")
 def play():
@@ -130,6 +129,10 @@ def choose():
     session["turn"] = turn + 1
     return redirect(url_for("play"))
 """
+@app.post("/api/reset_story")
+def reset_story():
+    save_story({"story": []})
+    return jsonify({"ok": True})
 
 @app.route("/choose", methods=["POST"])
 def choose():

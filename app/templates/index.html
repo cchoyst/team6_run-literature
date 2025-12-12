@@ -72,9 +72,8 @@
 <body>
     <div class="start-container">
         <h1>走れ文学</h1>
-
         <div class="menu-item">
-            <a href="{{ url_for('start_game') }}">スタート</a>
+            <a href="{{ url_for('start_game') }}" onclick="fetch('/api/reset_story', {method: 'POST'})">はじめから</a>
         </div>
         <div class="menu-item">
             <a href="#" onclick="alert('これは文学作品をテーマにした、スリリングな冒険ゲームです。'); return false;">あらすじ</a>
