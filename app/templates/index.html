@@ -4,82 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>走れ文学 - スタート画面</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            color: #333;
-            background-image: url('https://via.placeholder.com/1920x1080/87CEEB/FFFFFF?text=Background+Image+Placeholder'); /* 背景画像のプレースホルダー */
-            background-size: cover;
-            background-position: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 文字に影を追加 */
-        }
-
-        .start-container {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.85); /* 半透明の背景 */
-            padding: 40px 60px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 90%;
-            backdrop-filter: blur(5px); /* 背景を少しぼかす */
-        }
-
-        h1 {
-            font-size: 3.5em;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .menu-item {
-            margin: 20px 0;
-        }
-
-        .menu-item a {
-            display: inline-block;
-            padding: 15px 40px;
-            font-size: 1.8em;
-            color: #fff;
-            background-color: #3498db;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            min-width: 200px; /* ボタンの最小幅 */
-        }
-
-        .menu-item a:hover {
-            background-color: #2980b9;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .menu-item a:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
+    <div class="literary-background">
+        {{ background_text }}
+    </div>
+
     <div class="start-container">
         <h1>走れ文学</h1>
         <div class="menu-item">
             <a href="{{ url_for('start_game') }}" onclick="fetch('/api/reset_story', {method: 'POST'})">はじめから</a>
         </div>
         <div class="menu-item">
-            <a href="#" onclick="alert('これは文学作品をテーマにした、スリリングな冒険ゲームです。'); return false;">あらすじ</a>
+            <a href="#" onclick="alert('文学の世界へようこそ'); return false;">あらすじ</a>
         </div>
         <div class="menu-item">
-            <a href="#" onclick="alert('操作方法やゲームの難易度などを設定できます。'); return false;">設定</a>
+            <a href="#" onclick="alert('設定機能は開発中です'); return false;">設定</a>
         </div>
     </div>
 </body>

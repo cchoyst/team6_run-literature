@@ -3,6 +3,7 @@
 import os
 import json
 import requests
+import random
 from flask import (
     Flask,
     render_template,
@@ -67,9 +68,64 @@ def attach_icons(options):
 #--------------------------------------------------------------
 
 # タイトル画面（index.html)
+# ----------------------------------------------------------------------------------
+#  ヘルパー関数：背景用の文学テキスト取得 (API不使用・GitHub Rawデータ使用版)
+# ----------------------------------------------------------------------------------
+def get_literary_background():
+    """
+    背景に表示するための長い文学テキストを取得する。
+    安定性を重視し、GitHub上の青空文庫テキストデータを使用する。
+    """
+    library = [
+        {
+            "title": "走れメロス",
+            "url": "https://raw.githubusercontent.com/aozorahack/aozorabunko_text/master/cards/000035/files/1567_14913.txt"
+        },
+        {
+            "title": "注文の多い料理店",
+            "url": "https://raw.githubusercontent.com/aozorahack/aozorabunko_text/master/cards/000081/files/43754_17659.txt"
+        },
+        {
+            "title": "檸檬",
+            "url": "https://raw.githubusercontent.com/aozorahack/aozorabunko_text/master/cards/000074/files/427_19793.txt"
+        }
+    ]
+
+    try:
+        # ランダムに一冊選ぶ
+        book = random.choice(library)
+        
+        # テキストデータを取得
+        response = requests.get(book["url"], timeout=3)
+        response.encoding = 'utf-8' # 文字化け防止
+        
+        if response.status_code == 200:
+            text = response.text
+            # 背景用なので冒頭2000文字程度でカット
+            return text[:2000]
+            
+    except Exception as e:
+        print(f"Background Text Error: {e}")
+
+    # エラー時のフォールバック（メロス冒頭）
+    fallback = (
+        "メロスは激怒した。必ず、かの邪智暴虐の王を除かなければならぬと決意した。"
+        "メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。"
+        "けれども邪悪に対しては、人一倍に敏感であった。"
+    )
+    return fallback * 20
+
+
+# ----------------------------------------------------------------------------------
+#  ルーティング
+# ----------------------------------------------------------------------------------
+
+# タイトル画面（index.html)
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # 背景用テキストを取得して HTML に渡す
+    bg_text = get_literary_background()
+    return render_template("index.html", background_text=bg_text)
 
 
 # ゲーム全体の初期化
