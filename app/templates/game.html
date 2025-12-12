@@ -60,6 +60,26 @@
          alt="メロス" class="runner">
 
     <!-- 選択肢（上） -->
+     {% if options|length > 0 %}
+     <form action="/choose" method="POST" class="option-form slot-top">
+      <input type="hidden" name="chosen_text" value="{{ options[0].text }}">
+      <input type="hidden" name="selected_mood" value="{{ options[0].mood }}">
+      <input type="hidden" name="current_work" value="{{ options[0].work_title }}">
+      <input type="hidden" name="next_theme" value="{{ options[0].theme }}">
+      
+      <button type="submit" class="speech-bubble">
+        <span class="option-content">
+          <img class="option-icon"
+                src="{{ url_for('static',
+                           filename='assets/characters/' ~ options[0].icon_filename) }}"
+                alt="">
+          <span class="option-text">{{ options[0].text }}</span>
+        </span>
+      </button>
+    </form>
+    {% endif %}
+
+    <!-- ここからコメントアウトしたい内容 
     {% if options|length > 0 %}
     <form method="post"
           action="{{ url_for('choose') }}"
@@ -79,6 +99,7 @@
       </button>
     </form>
     {% endif %}
+    終了 -->
 
     <!-- ▼ 選択肢（中央） -->
     {% if options|length > 1 %}

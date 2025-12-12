@@ -82,7 +82,6 @@ def start_game():
     session["current_mood"] = "neutral"
     return redirect(url_for("play"))
 
-
 # play.html（メロスが走る画面）
 @app.route("/play")
 def play():
@@ -110,6 +109,7 @@ def game():
 
 
 # 
+"""
 @app.route("/choose", methods=["POST"])
 def choose():
     # フォームから選ばれた次の mood
@@ -127,6 +127,49 @@ def choose():
   
     # 続く場合はターンを進める？　【あとで確認】
     session["turn"] = turn + 1
+    return redirect(url_for("play"))
+"""
+@app.post("/api/reset_story")
+def reset_story():
+    save_story({"story": []})
+    return jsonify({"ok": True})
+
+@app.route("/choose", methods=["POST"])
+def choose():
+    # game.html からのデータ
+    chosen_text = request.form.get("chosen_text", "")
+    chosen_mood = request.form.get("selected_mood", "neutral")
+    next_theme = request.form.get("next_theme", "友情")
+    current_work = request.form.get("current_work", "走れメロス")
+
+    # 1. LLM に段落生成を依頼
+    payload = {
+        "chosen_text": chosen_text,
+        "chosen_mood": chosen_mood,
+        "next_theme": next_theme,
+        "current_work": current_work
+    }
+
+    res = requests.post("http://127.0.0.1:5000/api/generate_scene_text", json=payload)
+
+    if res.status_code != 200:
+        print("LLM生成に失敗:", res.text)
+
+    # 2. ゲーム進行の状態更新
+    turn = session.get("turn", 1)
+    history = session.get("history", [])
+    history.append(chosen_mood)
+    session["history"] = history
+    session["current_mood"] = chosen_mood
+
+    # 最終ターンで ending へ
+    if turn >= 3:
+        return redirect(url_for("ending"))
+
+    # ターン経過
+    session["turn"] = turn + 1
+
+    # 3. play.html へ戻る（story.json が更新済み）
     return redirect(url_for("play"))
 
 
@@ -180,21 +223,19 @@ def get_next_choices():
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 2: LLMによる場面の橋渡しテキスト生成
 # ----------------------------------------------------------------------------------
-STORY_PATH = "data/story.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STORY_PATH = os.path.join(BASE_DIR, "static", "data", "story.json")
 
 def load_story():
-    """story.json を読み込む（無かったら初期化）"""
     if not os.path.exists(STORY_PATH):
         return {"story": []}
     with open(STORY_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 def save_story(story_data):
-    """story.json に保存する"""
+    os.makedirs(os.path.dirname(STORY_PATH), exist_ok=True)
     with open(STORY_PATH, "w", encoding="utf-8") as f:
         json.dump(story_data, f, ensure_ascii=False, indent=2)
-
 
 @app.route('/api/generate_scene_text', methods=['POST'])
 def generate_scene_text():
