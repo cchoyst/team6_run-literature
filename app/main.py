@@ -183,22 +183,21 @@ def ending():
     story_data = load_story()
     generated_story = story_data.get("story", [])
 
-    # ★ プレイ開始時の固定ストーリー（initialStory)
+    # ★ プレイ開始時の固定ストーリー
     initial_story = [
         "メロスは激怒した。",
         "ここではエピローグを表示。１ターン目なら選択肢画面その後は追加ストーリーを表示します。"
     ]
 
-    # ★ 全ストーリー結合
+    # ★ 段落リストのまま結合する
     full_story = initial_story + generated_story
-    story_text = "\n".join(full_story)
 
     return render_template(
         "ending.html",
-        final_label=final_label, # 希望・ふつう など
-        final_mood=final_mood,   # hope・neutral など
-        history=history,         # 途中の mood 遷移 【あとで確認】
-        story_text=story_text    # story
+        final_label=final_label,
+        final_mood=final_mood,
+        history=history,
+        story_text=full_story   
     )
 
 
