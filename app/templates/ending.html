@@ -28,6 +28,11 @@
     {% endif %}
   </section>
 
+  <section class="ending-panel">
+    <h2>あなたの物語</h2>
+    <pre class="ending-story">{{ story_text }}</pre>
+  </section>
+
   <form method="get" action="{{ url_for('index') }}">
     <button type="submit" class="restart-button">
       もう一度あそぶ
