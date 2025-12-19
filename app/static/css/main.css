@@ -138,7 +138,7 @@ button {
 
 .branch-bottom {
   top: var(--lane-middle);
-  transform: translateY(-5%) rotate(18deg);
+  transform: translateY(-10%) rotate(18deg);
 }
 
 .center-road {
