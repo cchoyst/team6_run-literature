@@ -31,6 +31,9 @@
 
         /* 縦書き設定 */
         #story-container {
+            position: absolute;
+            top: 0;
+            right: 0; /* 右上に固定*/
             writing-mode: vertical-rl; /* 縦書き（右から左へ）*/
             text-orientation: upright;
             font-size: 1.5rem;
@@ -41,7 +44,9 @@
             height: 100%; 
             width: fit-content; /* 内容の幅に合わせる */
             white-space: pre-wrap; 
-            padding-left: 20px;
+            padding-top: 20px;
+            padding-right: 20px;
+            padding-left: 0;
             transform-origin: top right; /* 右上を基点にスクロール制御 */
             transition: transform 0.5s ease-out; /* 段落送り時のアニメーション */
         }
