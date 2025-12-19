@@ -141,6 +141,13 @@ button {
   transform: translateY(85%) rotate(18deg);
 }
 
+.center-road {
+  left: 36%;
+  width: 28%;
+  height: var(--road-thick);
+  top: var(--lane-middle);
+  transform: translateY(-50%);
+}
 
 /* 土管 */
 .pipe {
