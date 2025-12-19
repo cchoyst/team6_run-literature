@@ -138,7 +138,7 @@ button {
 
 .branch-bottom {
   top: var(--lane-middle);
-  transform: translateY(85%) rotate(18deg);
+  transform: translateY(-5%) rotate(18deg);
 }
 
 .center-road {
@@ -147,6 +147,9 @@ button {
   height: var(--road-thick);
   top: var(--lane-middle);
   transform: translateY(-50%);
+
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
 }
 
 /* 土管 */

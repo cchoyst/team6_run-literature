@@ -63,14 +63,17 @@
             height: 200px;
             position: fixed; /* 固定位置に修正 */
             bottom: 0;
+            left: 0;
             background-color: #008000; /* 濃い緑の地面 */
+            z-index: 5;
         }
 
         /* メロス（キャラクター）のスタイル */
         #melos {
             position: absolute;
-            bottom: 30px;
-            left: 50px;
+            bottom: 60px;
+            left: 0;
+            width: 80px;
             z-index: 10;
         }
 
@@ -128,10 +131,10 @@
 
 <!-- 画面下部: ステージ/アクションエリア -->
 <div class="stage-container">
-    <div id="melos">
+    <div id="melos" style="display: inline-block;">
         <img src="{{ url_for('static', filename='assets/characters/Melos.jpg') }}"
-        alt="メロス"
-        style="width: 80px; height: auto; user-select: none;">
+          alt="メロス"
+          style="width: 80px; height: auto; display: block; user-select: none;">
     </div>
 </div>
 
@@ -162,31 +165,32 @@
     let melosPositionX = 0;
     const melosSpeed = 10;
 
-    /* ----------------------------------------------- */
-    /* メロス移動アニメーション (自動移動)              */
-    /* ----------------------------------------------- */
-    function updateMelosPosition() {
-        // ステージとメロスの幅を取得
-        const stageContainer = document.querySelector(".stage-container");
-        const stageWidth = stageContainer.clientWidth;
-        const melosWidth = melos.clientWidth;
-        
-        // 1. 位置を更新（右へ移動）
-        melosPositionX += 3;
+/* ----------------------------------------------- */
+/* メロス移動アニメーション (自動移動)              */
+/* ----------------------------------------------- */
+function updateMelosPosition() {
+    const stageContainer = document.querySelector(".stage-container");
+    if (!stageContainer) return; // コンテナがない場合のエラー防止
 
-        // 2. 右端に到達したかチェックし、左端に戻す
-        // melosPositionX が (ステージの幅 - melosの幅) を超えたら、左端 (0) にリセット
-        if (melosPositionX >= stageWidth + 10) {
-            melosPositionX = -melosWidth; 
-        }
+    const stageWidth = stageContainer.offsetWidth; // clientWidthより確実
+    const melosWidth = melos.offsetWidth || 80;    // 画像読み込み前でも80pxとする
 
-        // 3. CSSに新しい位置を適用
-        melos.style.left = `${melosPositionX}px`;
-        
+    // 1. 位置を更新（右へ移動）
+    melosPositionX += 3;
 
-        // 5. 次のフレームで再度呼び出し
-        requestAnimationFrame(updateMelosPosition);
+    // 2. ループ処理
+    // 右端（画面幅）を完全に超えたら、メロスの幅分左（画面外）から再登場させる
+    if (melosPositionX > stageWidth) {
+        melosPositionX = -melosWidth;
     }
+
+    // 3. CSSに適用
+    // 「吸い込まれる」のを防ぐため、bottomをJS側でも固定してしまっても良いです
+    melos.style.left = melosPositionX + "px";
+    // melos.style.bottom = "60px"; // もし下に沈むならこれも追加
+
+    requestAnimationFrame(updateMelosPosition);
+}
 
     /* ----------------------------------------------- */
     /* タイピング処理                                   */
