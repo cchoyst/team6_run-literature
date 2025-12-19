@@ -63,14 +63,17 @@
             height: 200px;
             position: fixed; /* 固定位置に修正 */
             bottom: 0;
+            left: 0;
             background-color: #008000; /* 濃い緑の地面 */
+            z-index: 5;
         }
 
         /* メロス（キャラクター）のスタイル */
         #melos {
             position: absolute;
-            bottom: 30px;
-            left: 50px;
+            bottom: 60px;
+            left: 0;
+            width: 80px;
             z-index: 10;
         }
 
@@ -128,14 +131,11 @@
 
 <!-- 画面下部: ステージ/アクションエリア -->
 <div class="stage-container">
-    <div id="melos">
+    <div id="melos" style="display: inline-block;">
         <img src="{{ url_for('static', filename='assets/characters/Melos.jpg') }}"
-        alt="メロス"
-        style="width: 80px; height: auto; user-select: none;">
+          alt="メロス"
+          style="width: 80px; height: auto; display: block; user-select: none;">
     </div>
-    
-    <!-- 渦巻（選択肢トリガー）の例 -->
-    <div class="vortex" id="vortex-trigger" style="left: 650px;"></div>
 </div>
 
 <!-- 選択肢オーバーレイ（前回コードから省略 - 動作確認が目的） -->
@@ -162,17 +162,35 @@
     let currentCharacterIndex = 0;
     let typingIntervalId = null;
 
-    let melosPositionX = 50;
+    let melosPositionX = 0;
     const melosSpeed = 10;
 
-    /* ----------------------------------------------- */
-    /* メロス移動アニメーション                        */
-    /* ----------------------------------------------- */
-    function updateMelosPosition() {
-        melos.style.left = `${melosPositionX}px`;
-        requestAnimationFrame(updateMelosPosition);
-        checkCollision();  // ← 毎フレーム当たり判定
+/* ----------------------------------------------- */
+/* メロス移動アニメーション (自動移動)              */
+/* ----------------------------------------------- */
+function updateMelosPosition() {
+    const stageContainer = document.querySelector(".stage-container");
+    if (!stageContainer) return; // コンテナがない場合のエラー防止
+
+    const stageWidth = stageContainer.offsetWidth; // clientWidthより確実
+    const melosWidth = melos.offsetWidth || 80;    // 画像読み込み前でも80pxとする
+
+    // 1. 位置を更新（右へ移動）
+    melosPositionX += 3;
+
+    // 2. ループ処理
+    // 右端（画面幅）を完全に超えたら、メロスの幅分左（画面外）から再登場させる
+    if (melosPositionX > stageWidth) {
+        melosPositionX = -melosWidth;
     }
+
+    // 3. CSSに適用
+    // 「吸い込まれる」のを防ぐため、bottomをJS側でも固定してしまっても良いです
+    melos.style.left = melosPositionX + "px";
+    // melos.style.bottom = "60px"; // もし下に沈むならこれも追加
+
+    requestAnimationFrame(updateMelosPosition);
+}
 
     /* ----------------------------------------------- */
     /* タイピング処理                                   */
@@ -217,51 +235,9 @@
         }
     };
 
-    /* ----------------------------------------------- */
-    /* キー入力：メロス移動                             */
-    /* ----------------------------------------------- */
-    document.addEventListener("keydown", (event) => {
-        const stageWidth = document.querySelector(".stage-container").clientWidth;
-        const melosWidth = melos.clientWidth;
+   
+    
 
-        if (event.key === "a" || event.key === "A" || event.key === "ArrowLeft") {
-            melosPositionX = Math.max(melosPositionX - melosSpeed, 0);
-        }
-        if (event.key === "d" || event.key === "D" || event.key === "ArrowRight") {
-            melosPositionX = Math.min(melosPositionX + melosSpeed, stageWidth - melosWidth);
-        }
-    });
-
-    /* ----------------------------------------------- */
-    /* ★ 当たり判定（メロス × 渦巻）                     */
-    /* ----------------------------------------------- */
-    function checkCollision() {
-        const melosRect = melos.getBoundingClientRect();
-        const vortexRect = vortex.getBoundingClientRect();
-
-        const hit =
-            melosRect.right > vortexRect.left &&
-            melosRect.left < vortexRect.right &&
-            melosRect.bottom > vortexRect.top &&
-            melosRect.top < vortexRect.bottom;
-
-        if (hit) {
-            showChoiceOverlay();
-        }
-    }
-
-    /* ----------------------------------------------- */
-    /* ★ 渦巻に触れたときのダミー選択肢画面表示           */
-    /* （今は閉じるだけでもOK）                          */
-    /* ----------------------------------------------- */
-    function showChoiceOverlay() {
-        const overlay = document.getElementById("choice-overlay");
-        overlay.style.display = "flex";
-    }
-
-    window.hideChoices = function () {
-        document.getElementById("choice-overlay").style.display = "none";
-    };
 
     /* ----------------------------------------------- */
     /* 初期化：JSON 読み込み ＋ プロローグ結合            */
