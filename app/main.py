@@ -206,14 +206,17 @@ def choose():
     session["history"] = history
     session["current_mood"] = chosen_mood
 
-    # 最終ターンで ending へ
-    if turn >= 3:
-        return redirect(url_for("ending"))
+    # 3. ゲーム進行の状態更新
+    # ... (省略) ...
+    session["current_mood"] = chosen_mood
 
-    # ターン経過
+    # if turn >= 3:
+    #     return redirect(url_for("ending"))
+
+    # ターンを無条件に進める（3 → 4 になる）
     session["turn"] = turn + 1
 
-    # 3. play.html へ戻る（story.json が更新済み）
+    # play.html へ戻り、最後の文章を表示させる
     return redirect(url_for("play"))
 
 

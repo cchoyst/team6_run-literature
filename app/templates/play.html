@@ -175,6 +175,7 @@
     }
 
     // --- 次の段落へ ---
+    // --- 次の段落へ ---
     window.nextParagraph = function () {
         if (!storyLoaded) return;
 
@@ -182,8 +183,18 @@
             startTyping(storyData[currentParagraphIndex]);
             currentParagraphIndex++;
         } else {
-            // すべて表示し終わったら、選択肢画面へ
-            window.location.href = "{{ url_for('game') }}";
+            // ★ここを修正: ターン数に応じて遷移先を変える
+            
+            // Flaskから渡された現在のターン数を取得
+            const currentTurn = parseInt("{{ turn }}");
+
+            // 4ターン目（3回目の選択の後）ならエンディングへ
+            if (currentTurn >= 4) {
+                window.location.href = "{{ url_for('ending') }}";
+            } else {
+                // それ以外なら次の選択肢画面へ
+                window.location.href = "{{ url_for('game') }}";
+            }
         }
     };
 
