@@ -320,26 +320,23 @@ button {
 /* 1. 縦書き文学背景のスタイル */
 .literary-background {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: -20%;
+  left: 0%;
   width: 100%;
-  height: 100%;
-  z-index: 0; /* bodyより上、コンテンツより奥 */
+  height: 130%;
+  z-index: 0;
   
-  /* 縦書き設定 */
   writing-mode: vertical-rl;
   text-orientation: upright;
   
-  /* 背景色と文字設定 */
-  background-color: #fcfaf2; /* 和紙っぽい色（ゲーム画面の青を上書き） */
+  background-color: #fcfaf2;
   color: #000;
-  opacity: 0.30; /* 文字を薄く透かす */
-  font-family: "Yu Mincho", "HiraMinProN-W3", serif; /* 明朝体 */
+  opacity: 0.30;
+  font-family: "Yu Mincho", "HiraMinProN-W3", serif;
   font-size: 24px;
   line-height: 2.0;
   padding: 20px;
   
-  /* はみ出し防止と選択不可 */
   overflow: hidden;
   user-select: none;
   pointer-events: none;
