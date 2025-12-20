@@ -130,6 +130,7 @@
         "邪智暴虐の王を除かなければならぬと決意した。"
     ];
 
+
     // --- メロス移動アニメーション ---
     function updateMelosPosition() {
         const stageContainer = document.querySelector(".stage-container");
@@ -146,7 +147,10 @@
         requestAnimationFrame(updateMelosPosition);
     }
 
-    // --- タイピング処理 ---
+    
+    /* ----------------------------------------------- */
+    /* タイピング処理（音なし・スクロール修正版）         */
+    /* ----------------------------------------------- */
     function startTyping(text) {
         if (typingIntervalId) clearInterval(typingIntervalId);
 
@@ -164,17 +168,23 @@
                 displayed += text[currentCharacterIndex];
                 paraDiv.textContent = displayed;
                 currentCharacterIndex++;
-                // 自動スクロール（新しい段落が見えるように）
-                storyContainer.style.transform = `translateX(${storyContainer.scrollWidth - storyContainer.clientWidth}px)`;
-            } else {
-                clearInterval(typingIntervalId);
-                typingIntervalId = null;
-                nextButton.disabled = false;
-                nextButton.textContent = "次の段落へ";
-            }
-        }, 80); // タイピング速度
-    }
 
+                // --- 自動スクロールの計算 ---
+                // 縦書き(vertical-rl)では中身が左に伸びるため、
+                // 「(全幅) - (表示幅)」の分だけ【左（マイナス）】にずらす
+            const scrollOffset = storyContainer.scrollWidth - storyContainer.clientWidth;
+            if (scrollOffset > 0) {
+                // はみ出した分だけ左へスライド
+                storyContainer.style.transform = `translateX(${scrollOffset}px)`;
+            }
+        } else {
+            clearInterval(typingIntervalId);
+            typingIntervalId = null;
+            nextButton.disabled = false;
+            nextButton.textContent = "次の段落へ";
+        }
+    }, 80); // タイピング速度
+}
     // --- 次の段落へ ---
     // --- 次の段落へ ---
     window.nextParagraph = function () {

@@ -17,7 +17,7 @@
             <a href="{{ url_for('start_game') }}" onclick="fetch('/api/reset_story', {method: 'POST'})">はじめから</a>
         </div>
         <div class="menu-item">
-            <a href="#" onclick="alert('文学の世界へようこそ'); return false;">あらすじ</a>
+            <a href="{{ url_for('synopsis') }}">あらすじ</a>
         </div>
         <div class="menu-item">
             <a href="#" onclick="alert('設定機能は開発中です'); return false;">設定</a>

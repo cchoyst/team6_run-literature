@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品選択 - 走れ文学</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="start-page-body">
+    <div class="literary-background">
+        {{ background_text }}
+    </div>
+
+    <div class="start-container">
+        <h1>登場作品のあらすじ</h1>
+        <p style="color: #666; margin-bottom: 20px;">読みたい作品を選択してください</p>
+
+        {% for title in titles %}
+        <div class="menu-item">
+            <a href="{{ url_for('synopsis_detail', work_id=title.id) }}">
+                {{ title.name }}
+            </a>
+        </div>
+        {% endfor %}
+
+        <div class="menu-item" style="margin-top: 30px;">
+            <a href="{{ url_for('index') }}" style="background-color: #95a5a6; min-width: 150px; font-size: 1.2em; padding: 10px 30px;">
+                戻る
+            </a>
+        </div>
+    </div>
+</body>
+</html>
