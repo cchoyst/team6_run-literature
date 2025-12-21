@@ -43,6 +43,7 @@
     <div class="stage-bg-css">
       <!-- 道 -->
       <div class="road main-road"></div>
+      <div class="road center-road"></div>
       <div class="road branch-road branch-top"></div>
       <div class="road branch-road branch-bottom"></div>
 
@@ -61,19 +62,16 @@
 
     <!-- 選択肢（上） -->
      {% if options|length > 0 %}
-     <form action="/choose" method="POST" class="option-form slot-top">
-      <input type="hidden" name="chosen_text" value="{{ options[0].text }}">
-      <input type="hidden" name="selected_mood" value="{{ options[0].mood }}">
-      <input type="hidden" name="current_work" value="{{ options[0].work_title }}">
-      <input type="hidden" name="next_theme" value="{{ options[0].theme }}">
+    <form action="/choose" method="POST" class="option-form slot-top">
+      <input type="hidden" name="chosen_text" value="{{ options[0]['text'] }}">
+      <input type="hidden" name="selected_mood" value="{{ options[0]['mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[0]['work_title'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[0]['theme'] }}">
       
       <button type="submit" class="speech-bubble">
         <span class="option-content">
-          <img class="option-icon"
-                src="{{ url_for('static',
-                           filename='assets/characters/' ~ options[0].icon_filename) }}"
-                alt="">
-          <span class="option-text">{{ options[0].text }}</span>
+          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[0]['icon_filename']) }}">
+          <span class="option-text">{{ options[0]['text'] }}</span>
         </span>
       </button>
     </form>
@@ -103,20 +101,16 @@
 
     <!-- ▼ 選択肢（中央） -->
     {% if options|length > 1 %}
-    <form method="post"
-          action="{{ url_for('choose') }}"
-          class="option-form slot-middle">
-      <input type="hidden" name="selected_mood"
-             value="{{ options[1]['next_mood'] }}">
+    <form method="post" action="{{ url_for('choose') }}" class="option-form slot-middle">
+      <input type="hidden" name="chosen_text" value="{{ options[1]['text'] }}">
+      <input type="hidden" name="selected_mood" value="{{ options[1]['mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[1]['work_title'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[1]['theme'] }}">
+
       <button type="submit" class="speech-bubble">
         <span class="option-content">
-          <img class="option-icon"
-               src="{{ url_for('static',
-                               filename='assets/characters/' ~ options[1]['icon_filename']) }}"
-               alt="">
-          <span class="option-text">
-            {{ options[1]['text'] }}
-          </span>
+          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[1]['icon_filename']) }}">
+          <span class="option-text">{{ options[1]['text'] }}</span>
         </span>
       </button>
     </form>
@@ -124,20 +118,16 @@
 
     <!-- ▼ 選択肢（下） -->
     {% if options|length > 2 %}
-    <form method="post"
-          action="{{ url_for('choose') }}"
-          class="option-form slot-bottom">
-      <input type="hidden" name="selected_mood"
-             value="{{ options[2]['next_mood'] }}">
+    <form method="post" action="{{ url_for('choose') }}" class="option-form slot-bottom">
+      <input type="hidden" name="chosen_text" value="{{ options[2]['text'] }}">
+      <input type="hidden" name="selected_mood" value="{{ options[2]['mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[2]['work_title'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[2]['theme'] }}">
+      
       <button type="submit" class="speech-bubble">
         <span class="option-content">
-          <img class="option-icon"
-               src="{{ url_for('static',
-                               filename='assets/characters/' ~ options[2]['icon_filename']) }}"
-               alt="">
-          <span class="option-text">
-            {{ options[2]['text'] }}
-          </span>
+          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[2]['icon_filename']) }}">
+          <span class="option-text">{{ options[2]['text'] }}</span>
         </span>
       </button>
     </form>

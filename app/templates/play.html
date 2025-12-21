@@ -25,32 +25,32 @@
             background-color: #FFFFF0; /* クリーム色 */
             border: 5px solid #F0E68C; /* 薄い金色の縁取り */
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-            overflow: hidden; /* スクロールをJSで制御するため非表示 */
+            overflow: hidden;
             position: relative;
         }
 
         /* 縦書き設定 */
         #story-container {
-            writing-mode: vertical-rl; /* 縦書き（右から左へ）*/
-            text-orientation: upright;
-            font-size: 1.5rem;
-            line-height: 2.5rem;
-            letter-spacing: 0.1rem;
-            color: #333;
-            /* テキストが出現する領域 */
-            height: 100%; 
-            width: fit-content; /* 内容の幅に合わせる */
-            white-space: pre-wrap; 
-            padding-left: 20px;
-            transform-origin: top right; /* 右上を基点にスクロール制御 */
-            transition: transform 0.5s ease-out; /* 段落送り時のアニメーション */
+          position: absolute;   /* 紙の右上を基点にする */
+          top: 30px;            /* 紙の padding に合わせて調整 */
+          right: 30px;
+          writing-mode: vertical-rl;
+          text-orientation: upright;
+          font-size: 1.5rem;
+          line-height: 2.5rem;
+          letter-spacing: 0.1rem;
+          color: #333;
+          white-space: pre-wrap;
+          padding: 0;           /* 左寄せ要素を消す */
+          width: auto;
+          height: calc(100% - 60px); /* 下に余白を残すなら */
         }
         
         .story-paragraph {
-            display: inline-block; /* 縦書きで段落を扱う */
-            margin-right: 2.5rem; /* 段落間のスペース */
-            padding-top: 10px; /* 見た目の調整 */
-            padding-bottom: 10px; /* 見た目の調整 */
+            display: inline-block;
+            margin-right: 2.5rem;
+            padding-top: 10px;
+            padding-bottom: 10px;
             min-height: 100%;
             vertical-align: top;
         }
@@ -61,122 +61,93 @@
         .stage-container {
             width: 100%;
             height: 200px;
-            position: fixed; /* 固定位置に修正 */
+            position: fixed;
             bottom: 0;
+            left: 0;
             background-color: #008000; /* 濃い緑の地面 */
+            z-index: 5;
         }
 
         /* メロス（キャラクター）のスタイル */
         #melos {
             position: absolute;
-            bottom: 30px;
-            left: 50px;
+            bottom: 60px;
+            left: 0;
+            width: 80px;
             z-index: 10;
         }
 
-        
-        /* 渦巻（選択肢トリガー）のスタイル - 見やすい位置に修正 */
-        .vortex {
-            position: absolute;
-            bottom: 30px; 
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8A2BE2 0%, #4B0082 100%);
-            box-shadow: 0 0 10px 5px #DA70D6;
-            z-index: 5;
-            animation: pulse 1.5s infinite alternate;
-        }
-
-        /* 渦巻のアニメーション */
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.8; }
-            to { transform: scale(1.1); opacity: 1; }
-        }
-        
         /* 段落送りボタンのスタイル */
         #next-paragraph-button {
             position: absolute;
             top: 20px;
             right: 20px;
             padding: 10px 20px;
-            background-color: #3B82F6; /* Blue-500 */
+            background-color: #3B82F6;
             color: white;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            z-index: 50; /* 作文用紙より上 */
+            z-index: 50;
             transition: background-color 0.3s;
         }
         #next-paragraph-button:hover {
-            background-color: #2563EB; /* Blue-600 */
+            background-color: #2563EB;
         }
-
     </style>
 </head>
 <body>
 
-<!-- 画面上部: 作文用紙エリア -->
 <div class="composition-paper">
-    <div id="story-container">
-        <!-- JSによって段落が動的に挿入される -->
-    </div>
+    <div id="story-container"></div>
 </div>
 
-<!-- 段落送りボタン -->
-<button id="next-paragraph-button" onclick="nextParagraph()">次の段落へ</button>
+<button id="next-paragraph-button" onclick="nextParagraph()">物語を読み込む...</button>
 
-<!-- 画面下部: ステージ/アクションエリア -->
 <div class="stage-container">
-    <div id="melos">
+    <div id="melos" style="display: inline-block;">
         <img src="{{ url_for('static', filename='assets/characters/Melos.jpg') }}"
-        alt="メロス"
-        style="width: 80px; height: auto; user-select: none;">
-    </div>
-    
-    <!-- 渦巻（選択肢トリガー）の例 -->
-    <div class="vortex" id="vortex-trigger" style="left: 650px;"></div>
-</div>
-
-<!-- 選択肢オーバーレイ（前回コードから省略 - 動作確認が目的） -->
-<div id="choice-overlay" style="display: none;">
-    <div class="choice-modal">
-        <h2 class="text-2xl font-bold mb-4 text-white">感情の渦：選択せよ</h2>
-        <p id="choice-context" class="mb-6 text-gray-300">（省略）</p>
-        <button onclick="hideChoices()">閉じる</button>
+          alt="メロス"
+          style="width: 80px; height: auto; display: block; user-select: none;">
     </div>
 </div>
-
 
 <script>
-    let storyData = [];                // ← 空で開始
-    let storyLoaded = false;  
-
+    // --- 変数定義 ---
+    let storyData = [];
+    let storyLoaded = false;
+    let currentParagraphIndex = 0;
+    let currentCharacterIndex = 0;
+    let typingIntervalId = null;
+    let melosPositionX = 0;
 
     const storyContainer = document.getElementById("story-container");
     const nextButton = document.getElementById("next-paragraph-button");
     const melos = document.getElementById("melos");
-    const vortex = document.getElementById("vortex-trigger");
 
-    let currentParagraphIndex = 0;
-    let currentCharacterIndex = 0;
-    let typingIntervalId = null;
+    const initialStory = [
+        "メロスは激怒した。",
+        "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。"
+    ];
+    
 
-    let melosPositionX = 50;
-    const melosSpeed = 10;
-
-    /* ----------------------------------------------- */
-    /* メロス移動アニメーション                        */
-    /* ----------------------------------------------- */
+    // --- メロス移動アニメーション ---
     function updateMelosPosition() {
-        melos.style.left = `${melosPositionX}px`;
+        const stageContainer = document.querySelector(".stage-container");
+        if (!stageContainer) return;
+
+        const stageWidth = stageContainer.offsetWidth;
+        const melosWidth = melos.offsetWidth || 80;
+
+        melosPositionX += 3;
+        if (melosPositionX > stageWidth) {
+            melosPositionX = -melosWidth;
+        }
+        melos.style.left = melosPositionX + "px";
         requestAnimationFrame(updateMelosPosition);
-        checkCollision();  // ← 毎フレーム当たり判定
     }
 
-    /* ----------------------------------------------- */
-    /* タイピング処理                                   */
-    /* ----------------------------------------------- */
+    // --- タイピング処理 ---
     function startTyping(text) {
         if (typingIntervalId) clearInterval(typingIntervalId);
 
@@ -186,113 +157,97 @@
 
         let displayed = "";
         currentCharacterIndex = 0;
+        nextButton.disabled = true;
+        nextButton.textContent = "表示中...";
 
         typingIntervalId = setInterval(() => {
             if (currentCharacterIndex < text.length) {
                 displayed += text[currentCharacterIndex];
                 paraDiv.textContent = displayed;
                 currentCharacterIndex++;
+                // 自動スクロール（新しい段落が見えるように）
+                storyContainer.style.transform = `translateX(${storyContainer.scrollWidth - storyContainer.clientWidth}px)`;
             } else {
                 clearInterval(typingIntervalId);
                 typingIntervalId = null;
                 nextButton.disabled = false;
                 nextButton.textContent = "次の段落へ";
             }
-        }, 100);
-
-        nextButton.disabled = true;
-        nextButton.textContent = "表示中...";
+        }, 80); // タイピング速度
     }
 
-    /* ----------------------------------------------- */
-    /* 次の段落へ                                       */
-    /* ----------------------------------------------- */
+    // --- 次の段落へ ---
+    // --- 次の段落へ ---
     window.nextParagraph = function () {
+        if (!storyLoaded) return;
+
         if (currentParagraphIndex < storyData.length) {
+            // まだ表示していない段落がある場合はタイピング表示
             startTyping(storyData[currentParagraphIndex]);
             currentParagraphIndex++;
         } else {
-            /* ★ 全部読み終わったら /game に飛ぶ */
-            window.location.href = "{{ url_for('game') }}";
+            // すべての段落を表示し終わった後の処理
+            
+            // Flask から渡された turn を数値として取得
+            const currentTurn = parseInt("{{ turn }}") || 1;
+
+            // 4回目（3回目の選択後の表示）ならエンディングへ
+            if (currentTurn >= 4) {
+                nextButton.textContent = "結末へ...";
+                window.location.href = "{{ url_for('ending') }}";
+            } else {
+                // 1〜3回目なら選択肢画面へ
+                nextButton.textContent = "選択肢へ...";
+                window.location.href = "{{ url_for('game') }}";
+            }
         }
     };
 
-    /* ----------------------------------------------- */
-    /* キー入力：メロス移動                             */
-    /* ----------------------------------------------- */
-    document.addEventListener("keydown", (event) => {
-        const stageWidth = document.querySelector(".stage-container").clientWidth;
-        const melosWidth = melos.clientWidth;
-
-        if (event.key === "a" || event.key === "A" || event.key === "ArrowLeft") {
-            melosPositionX = Math.max(melosPositionX - melosSpeed, 0);
-        }
-        if (event.key === "d" || event.key === "D" || event.key === "ArrowRight") {
-            melosPositionX = Math.min(melosPositionX + melosSpeed, stageWidth - melosWidth);
-        }
-    });
-
-    /* ----------------------------------------------- */
-    /* ★ 当たり判定（メロス × 渦巻）                     */
-    /* ----------------------------------------------- */
-    function checkCollision() {
-        const melosRect = melos.getBoundingClientRect();
-        const vortexRect = vortex.getBoundingClientRect();
-
-        const hit =
-            melosRect.right > vortexRect.left &&
-            melosRect.left < vortexRect.right &&
-            melosRect.bottom > vortexRect.top &&
-            melosRect.top < vortexRect.bottom;
-
-        if (hit) {
-            showChoiceOverlay();
-        }
-    }
-
-    /* ----------------------------------------------- */
-    /* ★ 渦巻に触れたときのダミー選択肢画面表示           */
-    /* （今は閉じるだけでもOK）                          */
-    /* ----------------------------------------------- */
-    function showChoiceOverlay() {
-        const overlay = document.getElementById("choice-overlay");
-        overlay.style.display = "flex";
-    }
-
-    window.hideChoices = function () {
-        document.getElementById("choice-overlay").style.display = "none";
-    };
-
-    /* ----------------------------------------------- */
-    /* 初期化：JSON 読み込み ＋ プロローグ結合            */
-    /* ----------------------------------------------- */
-    const initialStory = [
-        "メロスは激怒した。",
-        "ここではエピローグを表示。１ターン目なら選択肢画面その後は追加ストーリーを表示します。"
-    ];
-
+    // --- 初期化：JSON 読み込み ---
     async function loadStoryJson() {
         try {
             const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
             const jsonData = await response.json();
+            
+            // 全体のストーリーを構築
             storyData = initialStory.concat(jsonData.story);
+            
+            // Flaskから渡された現在のターン数を取得
+            const turn = parseInt("{{ turn }}") || 1;
+
+            if (turn > 1) {
+                // 2ターン目以降なら、最新の1文以外を先に表示しておく
+                for (let i = 0; i < storyData.length - 1; i++) {
+                    const paraDiv = document.createElement("div");
+                    paraDiv.className = "story-paragraph";
+                    paraDiv.textContent = storyData[i];
+                    storyContainer.appendChild(paraDiv);
+                }
+                // インデックスを最後の文に合わせる
+                currentParagraphIndex = storyData.length - 1;
+                nextButton.textContent = "続きを読み進める";
+            } else {
+                currentParagraphIndex = 0;
+                nextButton.textContent = "物語を始める";
+            }
+            
             storyLoaded = true;
-            console.log("JSON ストーリー読み込み完了:", storyData);
         } catch (error) {
             console.error("JSON 読み込みエラー:", error);
+            // JSONがない場合でも動くようにフォールバック
+            storyData = initialStory;
+            storyLoaded = true;
+            nextButton.textContent = "物語を始める";
         }
     }
 
     async function initializeGame() {
-        await loadStoryJson();     // ← 追加：先にJSON読み込む
+        await loadStoryJson();
         updateMelosPosition();
-        nextButton.textContent = "物語を始める";
-        nextButton.disabled = false;
     }
 
     initializeGame();
 </script>
-
 
 </body>
 </html>
