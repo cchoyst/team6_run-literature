@@ -43,14 +43,16 @@ WORK_ICON_MAP = {
 
 DEFAULT_ICON = "sun_icon.jpg"
 
-# emotion 表示用の日本語ラベル
-EMOTION_LABELS = {
-    "neutral": "ふつう",
-    "hope": "希望",
-    "despair": "不安・絶望",
-    # 必要に応じて増やしてOK
-}
 
+# データベースの mood カラムの値に合わせて修正
+EMOTION_LABELS = {
+    "hopeful": "希望",
+    "angry": "激怒",
+    "melancholic": "憂鬱・哀愁",
+    "anxious": "不安",
+    "calm": "平静",
+    "neutral": "ふつう"
+}
 
 def attach_icons(options):
     """各 option に icon_filename キーを追加するヘルパー。"""
@@ -102,7 +104,7 @@ def get_literary_background():
         return selected_book["content"]
     except Exception as e:
         print(f"Text Selection Error: {e}")
-        return "テキスト의読み込みに失敗しました。"
+        return "テキストの読み込みに失敗しました。"
 
 # ----------------------------------------------------------------------------------
 #  ルーティング
@@ -124,6 +126,7 @@ def start_game():
     session["turn"] = 1
     session["history"] = []
     session["current_mood"] = "neutral"
+    save_story({"story": []})
     return redirect(url_for("play"))
 
 # play.html（メロスが走る画面）
@@ -180,73 +183,98 @@ def reset_story():
 
 @app.route("/choose", methods=["POST"])
 def choose():
-    # game.html からのデータ
+    # 1. フォームデータの取得（HTML側が ['mood'] でも .mood でも取れるようにする）
     chosen_text = request.form.get("chosen_text", "")
-    chosen_mood = request.form.get("selected_mood", "neutral")
+    chosen_mood = request.form.get("selected_mood") or "neutral"
     next_theme = request.form.get("next_theme", "友情")
     current_work = request.form.get("current_work", "走れメロス")
 
-    # 1. LLM に段落生成を依頼
-    payload = {
-        "chosen_text": chosen_text,
-        "chosen_mood": chosen_mood,
-        "next_theme": next_theme,
-        "current_work": current_work
-    }
+    print(f"--- ユーザーが選択した感情: {chosen_mood} ---")
 
-    res = requests.post("http://127.0.0.1:5000/api/generate_scene_text", json=payload)
-
-    if res.status_code != 200:
-        print("LLM生成に失敗:", res.text)
-
-    # 2. ゲーム進行の状態更新
-    turn = session.get("turn", 1)
+    # 2. セッションの更新（ここをLLM生成より先に行う）
     history = session.get("history", [])
     history.append(chosen_mood)
+    
     session["history"] = history
     session["current_mood"] = chosen_mood
-
-    # 3. ゲーム進行の状態更新
-    # ... (省略) ...
-    session["current_mood"] = chosen_mood
-
-    # if turn >= 3:
-    #     return redirect(url_for("ending"))
-
-    # ターンを無条件に進める（3 → 4 になる）
+    turn = session.get("turn", 1)
     session["turn"] = turn + 1
+    session.modified = True
 
-    # play.html へ戻り、最後の文章を表示させる
+    # 3. LLMによる文章生成（内部のロジックを直接呼ぶ）
+    # 外部への requests.post("http://127.0.0.1:5000/...") はデッドロックの原因になるので避ける
+    try:
+        # これまでのストーリーを読み込む
+        story_data = load_story()
+        previous_story = "\n".join(story_data.get("story", []))
+
+        system_instruction = (
+            "あなたは物語の語り手です。\n"
+            f"これまでのあらすじ：{previous_story}\n"
+            f"メロスの今の行動：{chosen_text} (作品：{current_work}, 感情：{chosen_mood})\n"
+            f"次のテーマ：{next_theme}\n"
+            "これらを踏まえ、次のシーンへ繋ぐ150字以内の文章を生成してください。"
+        )
+
+        payload = {
+            "contents": [{"parts": [{"text": f"メロスは{chosen_text}と言い、{next_theme}の世界へ向かった。"}]}],
+            "systemInstruction": {"parts": [{"text": system_instruction}]}
+        }
+        
+        # 直接 Gemini API を叩く
+        res = requests.post(f"{GEMINI_API_URL}?key={GEMINI_API_KEY}", json=payload, timeout=10)
+        res.raise_for_status()
+        
+        scene_text = res.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+        story_data["story"].append(scene_text)
+        save_story(story_data)
+
+    except Exception as e:
+        print(f"LLM Generation Error: {e}")
+        # 万が一生成に失敗しても、物語が止まらないよう仮の文章を入れる
+        story_data = load_story()
+        story_data["story"].append(f"メロスは{next_theme}の予感を感じながら先を急いだ。")
+        save_story(story_data)
+
+    # 4. 進行判定
+    # 3回選択した後の4回目の文章生成が終わったらエンディングへ
+    if session["turn"] > 4:
+        return redirect(url_for("ending"))
+    
     return redirect(url_for("play"))
 
 
 # エンディング画面（ending.html）
 @app.route("/ending")
 def ending():
+    # 1. その時点での最新の感情を取得（なければ neutral）
     final_mood = session.get("current_mood", "neutral")
+    # 日本語ラベルに変換
     final_label = EMOTION_LABELS.get(final_mood, final_mood)
-    history = session.get("history", [])
+    
+    # 2. 感情の履歴を取得
+    raw_history = session.get("history", [])
+    
+    # 軌跡の作成：初期状態(neutral) + 選択してきた履歴
+    full_history_raw = ["neutral"] + raw_history
+    history_labels = [EMOTION_LABELS.get(m, m) for m in full_history_raw]
 
+    # 3. これまで生成された文章をすべて読み込む
     story_data = load_story()
     generated_story = story_data.get("story", [])
 
-    # ★ プレイ開始時の固定ストーリー
-    initial_story = [
-        "メロスは激怒した。",
-        "ここではエピローグを表示。１ターン目なら選択肢画面その後は追加ストーリーを表示します。"
-    ]
-
-    # ★ 段落リストのまま結合する
+    # 初期文章（固定）
+    initial_story = ["メロスは激怒した。必ずや、かの邪智暴虐の王を除かなければならぬと決意した。"]
+    
+    # 全文章を結合
     full_story = initial_story + generated_story
 
     return render_template(
         "ending.html",
         final_label=final_label,
-        final_mood=final_mood,
-        history=history,
-        story_text=full_story   
+        history=history_labels, # 軌跡用（リスト）
+        story_text=full_story
     )
-
 
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 1: 感情連鎖による次の選択肢の取得

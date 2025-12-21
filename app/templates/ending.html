@@ -1,3 +1,6 @@
+<!--///////////////////////////////////////////
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -89,8 +92,13 @@
 <div class="ending-wrapper">
 
   <h1 class="ending-title">エンディング</h1>
+  
+
+
+  ///////////////////////////////////////////-->
 
   <!-- ▼ 最終的な感情の結果 ---------------------------- -->
+   <!--/////////////////////////////////////////////////////
   <div class="summary-card">
     <p>
       あなたの最終的な感情は  
@@ -105,8 +113,12 @@
     </p>
     {% endif %}
   </div>
+  //////////////////////////////////////////////////////-->
+
 
   <!-- ▼ あなたの物語（本のページ風） -------------------- -->
+
+  <!--/////////////////////////////////////////////////////
   <div class="story-book">
     <h2>あなたの物語</h2>
 
@@ -114,8 +126,12 @@
       <p class="story-paragraph">{{ paragraph }}</p>
     {% endfor %}
   </div>
+//////////////////////////////////////////////////////-->
+
 
   <!-- ▼ ボタン ------------------------------------------ -->
+
+  <!--/////////////////////////////////////////////////////
   <form method="get" action="{{ url_for('index') }}">
     <button type="submit" class="restart-button">
       もう一度あそぶ
@@ -123,5 +139,109 @@
   </form>
 
 </div>
+</body>
+</html>
+//////////////////////////////////////////////////////-->
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物語の結末 - 文学の旅路</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* エンディング専用の簡易スタイル（必要に応じてstyle.cssへ移動してください） */
+        .ending-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fdfaf5; /* 原稿用紙のような薄いベージュ */
+            border: 1px solid #d3c4a9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            line-height: 1.8;
+            font-family: "Sawarabi Mincho", "Hiragino Mincho ProN", serif;
+        }
+        .result-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-bottom: 2px double #d3c4a9;
+        }
+        .final-emotion-text {
+            font-size: 1.5rem;
+            color: #4a3c2c;
+        }
+        .final-emotion-text strong {
+            font-size: 2rem;
+            color: #a52a2a; /* 印象的な色に */
+        }
+        .mood-trace {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #666;
+        }
+        .story-section {
+            padding: 0 20px;
+        }
+        .story-section h2 {
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .story-paragraph {
+            margin-bottom: 1.5rem;
+            text-indent: 1em; /* 文頭一字下げ（文学的表現） */
+        }
+        .actions {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .btn-restart {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #4a3c2c;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .btn-restart:hover {
+            background-color: #6d5942;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ending-container">
+        <section class="result-section">
+            <h1>エンディング</h1>
+            
+            <p class="final-emotion-text">
+                あなたの最終的な感情は<strong>「{{ final_label }}」</strong>でした
+            </p>
+
+            <p class="mood-trace">
+                感情の変化の軌跡：
+                {% for label in history %}
+                    {{ label }}{% if not loop.last %} → {% endif %}
+                {% endfor %}
+                でした
+            </p>
+        </section>
+
+        <section class="story-section">
+            <h2>あなたの物語</h2>
+            <div class="story-content">
+                {% for paragraph in story_text %}
+                    <p class="story-paragraph">{{ paragraph | replace('\n', '<br>') | safe }}</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="btn-restart">もう一度最初から旅をする</a>
+        </div>
+
 </body>
 </html>

@@ -127,7 +127,7 @@
 
     const initialStory = [
         "メロスは激怒した。",
-        "邪智暴虐の王を除かなければならぬと決意した。"
+        "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。"
     ];
 
 
@@ -191,19 +191,22 @@
         if (!storyLoaded) return;
 
         if (currentParagraphIndex < storyData.length) {
+            // まだ表示していない段落がある場合はタイピング表示
             startTyping(storyData[currentParagraphIndex]);
             currentParagraphIndex++;
         } else {
-            // ★ここを修正: ターン数に応じて遷移先を変える
+            // すべての段落を表示し終わった後の処理
             
-            // Flaskから渡された現在のターン数を取得
-            const currentTurn = parseInt("{{ turn }}");
+            // Flask から渡された turn を数値として取得
+            const currentTurn = parseInt("{{ turn }}") || 1;
 
-            // 4ターン目（3回目の選択の後）ならエンディングへ
+            // 4回目（3回目の選択後の表示）ならエンディングへ
             if (currentTurn >= 4) {
+                nextButton.textContent = "結末へ...";
                 window.location.href = "{{ url_for('ending') }}";
             } else {
-                // それ以外なら次の選択肢画面へ
+                // 1〜3回目なら選択肢画面へ
+                nextButton.textContent = "選択肢へ...";
                 window.location.href = "{{ url_for('game') }}";
             }
         }
