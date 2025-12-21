@@ -35,13 +35,13 @@ GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMI
 
 # 作品ID → アイコンファイル名
 WORK_ICON_MAP = {
-    "hashire": "king_icon.jpg",    # 走れメロス
-    "lemon": "lemon_icon.jpg",     # 檸檬
-    "kokoro": "k_icon.jpg",        # こころ
-    "chumon": "cat_icon.jpg",      # 注文の多い料理店
+    "hashire": "king_icon.png",    # 走れメロス
+    "lemon": "lemon_icon.png",     # 檸檬
+    "kokoro": "k_icon.png",        # こころ
+    "chumon": "cat_icon.png",      # 注文の多い料理店
 }
 
-DEFAULT_ICON = "sun_icon.jpg"
+DEFAULT_ICON = "sun_icon.png"
 
 
 # データベースの mood カラムの値に合わせて修正
