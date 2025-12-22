@@ -16,7 +16,7 @@ if not api_key:
 
 genai.configure(api_key=api_key)
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite")
 
 # モデルを作る
 model = genai.GenerativeModel(MODEL_NAME)
