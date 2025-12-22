@@ -213,6 +213,10 @@
 </head>
 <body>
 
+    <audio id="ending-bgm" loop autoplay>
+        <source src="{{ url_for('static', filename='assets/sounds/ending.mp3') }}" type="audio/mpeg">
+    </audio>
+
     <div class="ending-container">
         <section class="result-section">
             <h1>エンディング</h1>
@@ -242,6 +246,18 @@
         <div class="actions">
             <a href="{{ url_for('index') }}" class="btn-restart">もう一度最初から旅をする</a>
         </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('ending-bgm');
+            if (audio) {
+                audio.play().catch(e => {
+                    console.log("BGM autoplay was blocked. It will start upon user interaction.");
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

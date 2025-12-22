@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
+    <audio id="start-bgm" loop autoplay>
+        <source src="{{ url_for('static', filename='assets/sounds/start.mp3') }}" type="audio/mpeg">
+    </audio>
+
     <div class="literary-background">
         {{ background_text }}
     </div>
@@ -23,5 +27,24 @@
             <a href="#" onclick="alert('設定機能は開発中です'); return false;">設定</a>
         </div>
     </div>
+
+    <script>
+        // ページ読み込み時に再生を試みる（あらすじ画面からの戻り対策）
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('start-bgm');
+            if (audio) {
+                audio.play().catch(err => {
+                    console.log("Autoplay waiting for user interaction");
+                });
+            }
+        });
+
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('start-bgm');
+            if (audio && audio.paused) {
+                audio.play();
+            }
+        }, { once: true }); // 最初の1クリック目だけ実行
+    </script>
 </body>
 </html>

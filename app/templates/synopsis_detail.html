@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body class="start-page-body">
+    <audio id="bgm-player" loop autoplay>
+        <source src="{{ url_for('static', filename='assets/sounds/start.mp3') }}" type="audio/mpeg">
+    </audio>
+
     <div class="literary-background">
         {{ background_text }}
     </div>
@@ -35,5 +39,12 @@
             <a href="{{ url_for('index') }}" style="background-color: #95a5a6; min-width: 150px;">TOPに戻る</a>
         </div>
     </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('bgm-player');
+            if (audio) { audio.play().catch(e => console.log("Playback blocked")); }
+        });
+    </script>
 </body>
 </html>

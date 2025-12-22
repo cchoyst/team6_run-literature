@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -98,6 +99,10 @@
 </head>
 <body>
 
+<audio id="bgm-player" loop>
+    <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
+</audio>
+
 <div class="composition-paper">
     <div id="story-container"></div>
 </div>
@@ -124,6 +129,8 @@
     const storyContainer = document.getElementById("story-container");
     const nextButton = document.getElementById("next-paragraph-button");
     const melos = document.getElementById("melos");
+    // BGM用要素の取得
+    const bgmPlayer = document.getElementById("bgm-player");
 
     const initialStory = [
         "メロスは激怒した。",
@@ -177,8 +184,12 @@
     }
 
     // --- 次の段落へ ---
-    // --- 次の段落へ ---
     window.nextParagraph = function () {
+        // ボタンが押されたとき（ユーザー操作）にBGMを再生
+        if (bgmPlayer && bgmPlayer.paused) {
+            bgmPlayer.play().catch(err => console.log("BGM playback blocked:", err));
+        }
+
         if (!storyLoaded) return;
 
         if (currentParagraphIndex < storyData.length) {
