@@ -143,13 +143,15 @@ def game():
     turn = session.get("turn", 1)
     current_mood = session.get("current_mood", "neutral")
 
-    # 現在の感情に応じて次の選択肢を生成
+    # 現在の感情に応じた選択肢を生成
     options = generate_options_from_csv(current_mood)
-    attach_icons(options)
+    
+    # 【重要】optionsの中身が辞書(dict)であることを確認し、アイコンを付与
+    options = attach_icons(options)
 
     return render_template(
         "game.html",
-        options=options,
+        options=options,  # 辞書のリストとして渡す
         mood=current_mood,
         turn=turn,
     )
