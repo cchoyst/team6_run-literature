@@ -6,259 +6,194 @@
     <title>走れ文学 - 作文用紙とメロス</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 日本語フォント設定 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: #87CEEB; /* スカイブルー */
-            overflow: hidden; /* 全体のスクロールを禁止 */
-        }
-
-        /* ---------------------------------------------------- */
-        /* 作文用紙エリアのスタイル */
-        /* ---------------------------------------------------- */
-        .composition-paper {
-            width: 80%;
-            max-width: 900px;
-            height: 400px;
-            margin: 20px auto;
-            padding: 30px;
-            background-color: #FFFFF0; /* クリーム色 */
-            border: 5px solid #F0E68C; /* 薄い金色の縁取り */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+            background-color: #87CEEB;
             overflow: hidden;
-            position: relative;
+            margin: 0;
         }
 
-        /* 縦書き設定 */
+        .composition-paper {
+            width: 85%;
+            max-width: 900px;
+            height: 450px;
+            margin: 20px auto;
+            padding: 40px 30px;
+            background-color: #FFFFF0;
+            border: 5px solid #F0E68C;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+            overflow-x: auto;
+            overflow-y: hidden;
+            /* 右から左へスクロールを流すための設定（これがスクロールの鍵です） */
+            direction: rtl; 
+        }
+
         #story-container {
-          position: absolute;   /* 紙の右上を基点にする */
-          top: 30px;            /* 紙の padding に合わせて調整 */
-          right: 30px;
-          writing-mode: vertical-rl;
-          text-orientation: upright;
-          font-size: 1.5rem;
-          line-height: 2.5rem;
-          letter-spacing: 0.1rem;
-          color: #333;
-          white-space: pre-wrap;
-          padding: 0;           /* 左寄せ要素を消す */
-          width: auto;
-          height: calc(100% - 60px); /* 下に余白を残すなら */
+            writing-mode: vertical-rl;
+            -webkit-writing-mode: vertical-rl;
+            text-orientation: upright;
+            direction: ltr; 
+            font-size: 1.6rem;
+            line-height: 3rem;
+            letter-spacing: 0.15rem;
+            color: #333;
+            height: 100%;
+            width: max-content; 
+            display: block;
         }
         
         .story-paragraph {
             display: inline-block;
-            margin-right: 2.5rem;
-            padding-top: 10px;
-            padding-bottom: 10px;
-            min-height: 100%;
+            margin-left: 3rem; 
             vertical-align: top;
+            white-space: pre-wrap; 
+            word-break: break-all;
+            overflow-wrap: break-word;
+            height: 100%;
+            max-height: 100%;
+            overflow: visible;
         }
 
-        /* ---------------------------------------------------- */
-        /* ステージエリアのスタイル */
-        /* ---------------------------------------------------- */
-        .stage-container {
-            width: 100%;
-            height: 200px;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background-color: #008000; /* 濃い緑の地面 */
-            z-index: 5;
+        .stage-container { 
+            width: 100%; height: 200px; position: fixed; bottom: 0; left: 0; 
+            background-color: #008000; z-index: 5; 
         }
+        #melos { position: absolute; bottom: 60px; left: 0; width: 80px; z-index: 10; }
 
-        /* メロス（キャラクター）のスタイル */
-        #melos {
-            position: absolute;
-            bottom: 60px;
-            left: 0;
-            width: 80px;
-            z-index: 10;
-        }
-
-        /* 段落送りボタンのスタイル */
         #next-paragraph-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background-color: #3B82F6;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 50;
+            position: absolute; top: 20px; right: 20px; padding: 10px 20px;
+            background-color: #3B82F6; color: white; border-radius: 8px;
+            cursor: pointer; font-weight: bold; z-index: 50;
             transition: background-color 0.3s;
         }
-        #next-paragraph-button:hover {
-            background-color: #2563EB;
-        }
+        #next-paragraph-button:disabled { background-color: #9CA3AF; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<audio id="bgm-player" loop>
-    <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
-</audio>
-
-<div class="composition-paper">
+<div class="composition-paper" id="paper-viewport">
     <div id="story-container"></div>
 </div>
 
 <button id="next-paragraph-button" onclick="nextParagraph()">物語を読み込む...</button>
 
 <div class="stage-container">
-    <div id="melos" style="display: inline-block;">
-        <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}"
-          alt="メロス"
-          style="width: 80px; height: auto; display: block; user-select: none;">
+    <div id="melos">
+        <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}" alt="メロス" style="width: 80px;">
     </div>
 </div>
 
+<audio id="bgm-player" loop>
+    <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
+</audio>
+
 <script>
-    // --- 変数定義 ---
     let storyData = [];
     let storyLoaded = false;
     let currentParagraphIndex = 0;
-    let currentCharacterIndex = 0;
     let typingIntervalId = null;
     let melosPositionX = 0;
 
     const storyContainer = document.getElementById("story-container");
+    const paperViewport = document.getElementById("paper-viewport");
     const nextButton = document.getElementById("next-paragraph-button");
     const melos = document.getElementById("melos");
-    // BGM用要素の取得
     const bgmPlayer = document.getElementById("bgm-player");
 
-    const initialStory = [
-        "メロスは激怒した。",
-        "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。"
-    ];
-    
+    const initialStory = ["メロスは激怒した。", "邪智暴虐の王を除かなければならぬと決意した。"];
 
-    // --- メロス移動アニメーション ---
     function updateMelosPosition() {
-        const stageContainer = document.querySelector(".stage-container");
-        if (!stageContainer) return;
-
-        const stageWidth = stageContainer.offsetWidth;
-        const melosWidth = melos.offsetWidth || 80;
-
-        melosPositionX += 3;
-        if (melosPositionX > stageWidth) {
-            melosPositionX = -melosWidth;
-        }
+        melosPositionX += 2;
+        if (melosPositionX > window.innerWidth) melosPositionX = -80;
         melos.style.left = melosPositionX + "px";
         requestAnimationFrame(updateMelosPosition);
     }
 
-    // --- タイピング処理 ---
-    function startTyping(text) {
-        if (typingIntervalId) clearInterval(typingIntervalId);
+    // 自動スクロール関数
+    function autoScroll() {
+        // direction: rtl の環境では scrollLeft を最小値（マイナス）にすると最新の左端を表示します
+        paperViewport.scrollLeft = -paperViewport.scrollWidth;
+    }
 
+    function startTyping(text) {
+        if (!text) return;
+        if (typingIntervalId) clearInterval(typingIntervalId);
+        
         const paraDiv = document.createElement("div");
         paraDiv.className = "story-paragraph";
         storyContainer.appendChild(paraDiv);
 
-        let displayed = "";
-        currentCharacterIndex = 0;
+        let charIdx = 0;
         nextButton.disabled = true;
         nextButton.textContent = "表示中...";
 
         typingIntervalId = setInterval(() => {
-            if (currentCharacterIndex < text.length) {
-                displayed += text[currentCharacterIndex];
-                paraDiv.textContent = displayed;
-                currentCharacterIndex++;
-                // 自動スクロール（新しい段落が見えるように）
-                storyContainer.style.transform = `translateX(${storyContainer.scrollWidth - storyContainer.clientWidth}px)`;
+            if (charIdx < text.length) {
+                paraDiv.textContent += text[charIdx];
+                charIdx++;
+                // 1文字ごとに最新の左端を追いかける
+                autoScroll();
             } else {
                 clearInterval(typingIntervalId);
                 typingIntervalId = null;
                 nextButton.disabled = false;
                 nextButton.textContent = "次の段落へ";
             }
-        }, 80); // タイピング速度
+        }, 80);
     }
 
-    // --- 次の段落へ ---
     window.nextParagraph = function () {
-        // ボタンが押されたとき（ユーザー操作）にBGMを再生
+        // ユーザー操作時にBGM再生
         if (bgmPlayer && bgmPlayer.paused) {
-            bgmPlayer.play().catch(err => console.log("BGM playback blocked:", err));
+            bgmPlayer.play().catch(e => console.log("再生待ち"));
         }
 
         if (!storyLoaded) return;
 
         if (currentParagraphIndex < storyData.length) {
-            // まだ表示していない段落がある場合はタイピング表示
             startTyping(storyData[currentParagraphIndex]);
             currentParagraphIndex++;
         } else {
-            // すべての段落を表示し終わった後の処理
-            
-            // Flask から渡された turn を数値として取得
-            const currentTurn = parseInt("{{ turn }}") || 1;
-
-            // 4回目（3回目の選択後の表示）ならエンディングへ
-            if (currentTurn >= 4) {
-                nextButton.textContent = "結末へ...";
-                window.location.href = "{{ url_for('ending') }}";
-            } else {
-                // 1〜3回目なら選択肢画面へ
-                nextButton.textContent = "選択肢へ...";
-                window.location.href = "{{ url_for('game') }}";
-            }
+            const turn = parseInt("{{ turn }}") || 1;
+            window.location.href = (turn >= 4) ? "{{ url_for('ending') }}" : "{{ url_for('game') }}";
         }
     };
 
-    // --- 初期化：JSON 読み込み ---
     async function loadStoryJson() {
         try {
             const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
+            if (!response.ok) throw new Error("JSON not found");
             const jsonData = await response.json();
-            
-            // 全体のストーリーを構築
             storyData = initialStory.concat(jsonData.story);
-            
-            // Flaskから渡された現在のターン数を取得
-            const turn = parseInt("{{ turn }}") || 1;
-
-            if (turn > 1) {
-                // 2ターン目以降なら、最新の1文以外を先に表示しておく
-                for (let i = 0; i < storyData.length - 1; i++) {
-                    const paraDiv = document.createElement("div");
-                    paraDiv.className = "story-paragraph";
-                    paraDiv.textContent = storyData[i];
-                    storyContainer.appendChild(paraDiv);
-                }
-                // インデックスを最後の文に合わせる
-                currentParagraphIndex = storyData.length - 1;
-                nextButton.textContent = "続きを読み進める";
-            } else {
-                currentParagraphIndex = 0;
-                nextButton.textContent = "物語を始める";
-            }
-            
-            storyLoaded = true;
-        } catch (error) {
-            console.error("JSON 読み込みエラー:", error);
-            // JSONがない場合でも動くようにフォールバック
+        } catch (e) {
             storyData = initialStory;
-            storyLoaded = true;
+        }
+
+        const turn = parseInt("{{ turn }}") || 1;
+
+        if (turn > 1) {
+            // 2ターン目以降：過去のログを即座に表示
+            for (let i = 0; i < storyData.length - 1; i++) {
+                const div = document.createElement("div");
+                div.className = "story-paragraph";
+                div.textContent = storyData[i];
+                storyContainer.appendChild(div);
+            }
+            currentParagraphIndex = storyData.length - 1;
+            nextButton.textContent = "続きを読み進める";
+            
+            // 過去ログを表示した直後に最新位置へスクロール
+            setTimeout(autoScroll, 100);
+        } else {
+            currentParagraphIndex = 0;
             nextButton.textContent = "物語を始める";
         }
+        storyLoaded = true;
     }
 
-    async function initializeGame() {
-        await loadStoryJson();
-        updateMelosPosition();
-    }
-
-    initializeGame();
+    loadStoryJson();
+    updateMelosPosition();
 </script>
-
 </body>
 </html>
