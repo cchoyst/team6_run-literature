@@ -33,6 +33,9 @@ SYSTEM_MSG = """
 各選択肢は、引用の雰囲気を活かした短いセリフにしてください。
 また、各選択肢ごとに次の mood を "next_mood" として指定してください。
 
+【指定可能な next_mood】
+"hopeful", "angry", "melancholic", "anxious", "calm", "neutral"
+
 出力は必ず次の形式の JSON **だけ** にしてください。
 各 options[i] の "work_id" には、引用に対応する work_id を 1 つ入れてください。
 
