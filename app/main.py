@@ -401,7 +401,7 @@ def synopsis():
         {"id": "kokoro", "name": "こころ"},
         {"id": "chumon", "name": "注文の多い料理店"}
     ]
-    return render_template("synopsis.html", titles=titles, background_text=bg_text)
+    return render_template("synopsis.html", titles=titles, background_text=bg_text,work_icons=WORK_ICON_MAP)
 
 # あらすじ詳細画面（選択したタイトルのあらすじを表示）
 @app.route("/synopsis/<work_id>")
@@ -458,7 +458,8 @@ def synopsis_detail(work_id):
     }
     
     content = synopsis_data.get(work_id, {"title": "不明", "text": "内容が見つかりませんでした。"})
-    return render_template("synopsis_detail.html", content=content, background_text=bg_text)
+    icon = WORK_ICON_MAP.get(work_id)
+    return render_template("synopsis_detail.html", content=content, background_text=bg_text,icon=icon)
 
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 3: LLMによるエンディングの生成 (省略)
