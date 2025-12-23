@@ -119,19 +119,16 @@ body {
 
 <body>
 
-<!-- 太陽 -->
 <img src="{{ url_for('static', filename='assets/backgrounds/sun_icon.png') }}"
      alt="太陽"
      class="sun-icon">
 
-<!-- 作文用紙 -->
 <div class="composition-paper" id="paper-viewport">
     <div id="story-container"></div>
 </div>
 
 <button id="next-paragraph-button" onclick="nextParagraph()">物語を読み込む...</button>
 
-<!-- ステージ -->
 <div class="stage-container">
     <div id="melos">
         <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}"
@@ -140,9 +137,8 @@ body {
     </div>
 </div>
 
-<!-- BGM -->
 <audio id="bgm-player" loop>
-    <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
+    <source src="{{ url_for('static', filename='assets/sounds/' ~ (mood if mood else 'neutral') ~ '.mp3') }}" type="audio/mpeg">
 </audio>
 
 <script>
@@ -160,7 +156,7 @@ const bgmPlayer = document.getElementById("bgm-player");
 
     const initialStory = ["メロスは激怒した。", 
                           "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
-                          "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"];
+                          "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語の内側だけでは終わらぬことを。"];
 
 function updateMelosPosition() {
     melosPositionX += 2;
@@ -199,7 +195,9 @@ function startTyping(text) {
 }
 
 window.nextParagraph = function () {
+    // ユーザー操作時にBGM再生
     if (bgmPlayer && bgmPlayer.paused) bgmPlayer.play().catch(() => {});
+    
     if (!storyLoaded) return;
 
     if (currentParagraphIndex < storyData.length) {
