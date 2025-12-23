@@ -3,6 +3,9 @@
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN",
                system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #6fd0ff;
@@ -12,12 +15,18 @@ button {
   font-family: inherit;
 }
 
+.game-fullscreen .game-header {
+  display: none;
+}
+
+
 /* レーンの縦位置と道の太さ */
 :root {
   --lane-top: 32%;
   --lane-middle: 52%;
   --lane-bottom: 72%;
   --road-thick: 16%;
+  --pipe-offset: 4%;
 }
 
 /* -------------------------
@@ -28,10 +37,12 @@ button {
 }
 
 .game-wrapper {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 16px;
-  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 
@@ -58,14 +69,10 @@ button {
 
 /* 空と雲（画像） */
 .game-sky {
-  height: 70px;
+  height: 22vh;
+  border: none;
+  border-radius: 0;
   background: #8fdcff;
-  border-radius: 8px 8px 0 0;
-  border: 3px solid #4ba3d9;
-  border-bottom: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .cloud-row {
@@ -88,14 +95,16 @@ button {
    ------------------------- */
 .game-stage {
   position: relative;
-  background: #55b54e;
-  border-radius: 0 0 16px 16px;
-  border: 3px solid #3e8a37;
-  border-top: none;
-  overflow: hidden;
   width: 100%;
-  padding-top: 48%;           /* 高さ:幅 ≒ 0.48 */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  height: 78vh;
+  padding-top: 0;
+
+  background: #55b54e;
+
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
 }
 
 .stage-bg-css {
@@ -116,16 +125,16 @@ button {
 /* 中央のまっすぐな道（左→分岐点） */
 .main-road {
   left: 0;
-  width: 36%;
-  height: var(--road-thick);
+  width: 32%;
+  height: 20%;
   top: var(--lane-middle);
   transform: translateY(-50%);
 }
 
 /* 分岐する道（上・下） */
 .branch-road {
-  left: 36%;
-  width: 28%;
+  left: 32%;
+  width: 30%;
   height: var(--road-thick);
   transform-origin: left center;
   border-radius: 999px;
@@ -142,8 +151,8 @@ button {
 }
 
 .center-road {
-  left: 36%;
-  width: 28%;
+  left: 32%;
+  width: 30%;
   height: var(--road-thick);
   top: var(--lane-middle);
   transform: translateY(-50%);
@@ -163,11 +172,11 @@ button {
 
 /* 右側3本：それぞれのレーンの中心 */
 .pipe-right {
-  left: 64%; 
+  left: 62%; 
 }
 
 .pipe-top {
-  top: var(--lane-top);
+  top: calc(var(--lane-top) - var(--pipe-offset));
 }
 
 .pipe-middle {
@@ -175,7 +184,7 @@ button {
 }
 
 .pipe-bottom {
-  top: var(--lane-bottom);
+  top: calc(var(--lane-bottom) + var(--pipe-offset));
 }
 
 
@@ -218,13 +227,13 @@ button {
 
 /* レーンと同じ高さに揃える */
 .slot-top {
-  top: var(--lane-top);
+  top: calc(var(--lane-top) - 1%);
 }
 .slot-middle {
   top: var(--lane-middle);
 }
 .slot-bottom {
-  top: var(--lane-bottom);
+  top: calc(var(--lane-bottom) + 1%);
 }
 
 
