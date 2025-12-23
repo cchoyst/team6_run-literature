@@ -466,6 +466,11 @@ def synopsis_detail(work_id):
     icon = WORK_ICON_MAP.get(work_id)
     return render_template("synopsis_detail.html", content=content, background_text=bg_text,icon=icon)
 
+@app.route("/operate")
+def operate():
+    bg_text = get_literary_background()
+    return render_template("operate.html", background_text=bg_text)
+
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 3: LLMによるエンディングの生成 (省略)
 # ----------------------------------------------------------------------------------

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゲームについて - 走れ文学</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body class="start-page-body">
+
+    <!-- BGM -->
+    <audio id="bgm-player" loop autoplay>
+        <source src="{{ url_for('static', filename='assets/sounds/start.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <!-- 背景テキスト -->
+    <div class="literary-background">
+        {{ background_text }}
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="start-container">
+
+        <h1 style="font-size: 2.8em; margin-bottom: 20px;">
+            走れ文学とは
+        </h1>
+
+        <div class="synopsis-box" style="
+            text-align: left;
+            line-height: 2.2;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            max-height: 55vh;
+            overflow-y: auto;
+            border: 1px dashed #7f8c8d;
+        ">
+
+            <p>
+                <b>『走れ文学』</b>は、太宰治の名作<b>『走れメロス』</b>を軸に、
+                他の文学作品の世界が交錯していく<b>クロスワールド型・物語体験ゲーム</b>です。
+            </p>
+
+            <p>
+                メロスは、ただひたすらに走り続けます。<br>
+                その道中で、<b>『檸檬』</b>、<b>『こころ』</b>、
+                <b>『注文の多い料理店』</b>といった別の文学世界が、
+                突然、風景や言葉や「気配」として割り込んできます。
+            </p>
+
+            <p>
+                それらは必ずしも理解し合う存在ではありません。<br>
+                すれ違い、違和感、影のような対話――<br>
+                それこそが、この物語の魅力です。
+            </p>
+
+            <hr style="margin: 25px 0;">
+
+            <h3>◆ 遊び方</h3>
+
+            <ul style="margin-left: 20px;">
+                <li>物語を読み進めながら、提示される選択肢を選びます</li>
+                <li>物語を始めるボタンでスタートし、読み終わったら次の段落へ行きましょう</li>
+                <li>サイトの更新ボタンがクルクルたら次の画面に行くのでそのままお待ちください</li>
+                <li>選択した<b>感情</b>によって、物語の流れが変化します</li>
+                <li>全3回の選択で、物語はエンディングへと向かいます</li>
+            </ul>
+
+            <p>
+                物語は<b>起承転結</b>の構造を持ち、
+                最後には必ず<b>セリヌンティウスのもとへ辿り着く可能性</b>を秘めています。
+            </p>
+
+            <hr style="margin: 25px 0;">
+
+            <p>
+                正解はありません。<br>
+                メロスが何を感じ、何を信じ、何を選ぶのか――<br>
+                それを決めるのは、あなたです。
+            </p>
+
+        </div>
+
+        <!-- ボタン -->
+        <div class="menu-item" style="
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        ">
+            <a href="{{ url_for('index') }}"
+               style="background-color: #3498db; min-width: 160px;">
+                スタート画面に戻る
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('bgm-player');
+            if (audio) {
+                audio.play().catch(() => {});
+            }
+        });
+    </script>
+
+</body>
+</html>
