@@ -1,201 +1,249 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>走れ文学 - 作文用紙とメロス</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #87CEEB;
-            overflow: hidden;
-            margin: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>走れ文学 - 作文用紙とメロス</title>
+<script src="https://cdn.tailwindcss.com"></script>
 
-        .composition-paper {
-            width: 85%;
-            max-width: 900px;
-            height: 450px;
-            margin: 20px auto;
-            padding: 40px 30px;
-            background-color: #FFFFF0;
-            border: 5px solid #F0E68C;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-            overflow-x: auto;
-            overflow-y: hidden;
-            /* 右から左へスクロールを流すための設定（これがスクロールの鍵です） */
-            direction: rtl; 
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
 
-        #story-container {
-            writing-mode: vertical-rl;
-            -webkit-writing-mode: vertical-rl;
-            text-orientation: upright;
-            direction: ltr; 
-            font-size: 1.6rem;
-            line-height: 3rem;
-            letter-spacing: 0.15rem;
-            color: #333;
-            height: 100%;
-            width: max-content; 
-            display: block;
-        }
-        
-        .story-paragraph {
-            display: inline-block;
-            margin-left: 3rem; 
-            vertical-align: top;
-            white-space: pre-wrap; 
-            word-break: break-all;
-            overflow-wrap: break-word;
-            height: 100%;
-            max-height: 100%;
-            overflow: visible;
-        }
+/* ===== スケール設定 ===== */
+:root {
+    --scale: 1.22;
+}
 
-        .stage-container { 
-            width: 100%; height: 200px; position: fixed; bottom: 0; left: 0; 
-            background-color: #008000; z-index: 5; 
-        }
-        #melos { position: absolute; bottom: 60px; left: 0; width: 80px; z-index: 10; }
+/* ===== 基本 ===== */
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #87CEEB;
+    overflow: hidden;
+    margin: 0;
+}
 
-        #next-paragraph-button {
-            position: absolute; top: 20px; right: 20px; padding: 10px 20px;
-            background-color: #3B82F6; color: white; border-radius: 8px;
-            cursor: pointer; font-weight: bold; z-index: 50;
-            transition: background-color 0.3s;
-        }
-        #next-paragraph-button:disabled { background-color: #9CA3AF; cursor: not-allowed; }
-    </style>
+/* ===== 太陽 ===== */
+.sun-icon {
+    position: fixed;
+    top: calc(30px * var(--scale));
+    left: calc(30px * var(--scale));
+    width: calc(150px * var(--scale));
+    height: calc(150px * var(--scale));
+    z-index: 100;
+    opacity: 0.9;
+    animation: slow-rotate 40s linear infinite;
+}
+
+@keyframes slow-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ===== 作文用紙 ===== */
+.composition-paper {
+    width: 85%;
+    max-width: calc(900px * var(--scale));
+    height: calc(450px * var(--scale));
+    margin: calc(20px * var(--scale)) auto;
+    padding: calc(40px * var(--scale)) calc(30px * var(--scale));
+    background-color: #FFFFF0;
+    border: calc(5px * var(--scale)) solid #F0E68C;
+    box-shadow: 0 calc(8px * var(--scale)) calc(15px * var(--scale)) rgba(0,0,0,0.4);
+    overflow-x: auto;
+    overflow-y: hidden;
+    direction: rtl;
+}
+
+#story-container {
+    writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-rl;
+    text-orientation: upright;
+    direction: ltr;
+    font-size: calc(1.6rem * var(--scale));
+    line-height: calc(3rem * var(--scale));
+    letter-spacing: calc(0.15rem * var(--scale));
+    color: #333;
+    height: 100%;
+    width: max-content;
+}
+
+.story-paragraph {
+    display: inline-block;
+    margin-left: calc(3rem * var(--scale));
+    vertical-align: top;
+    white-space: pre-wrap;
+    word-break: break-all;
+    height: 100%;
+}
+
+/* ===== ステージ ===== */
+.stage-container {
+    width: 100%;
+    height: calc(200px * var(--scale));
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background-color: #008000;
+    z-index: 5;
+}
+
+#melos {
+    position: absolute;
+    bottom: calc(60px * var(--scale));
+    left: 0;
+    width: calc(150px * var(--scale));
+    z-index: 10;
+}
+
+/* ===== ボタン ===== */
+#next-paragraph-button {
+    position: absolute;
+    top: calc(20px * var(--scale));
+    right: calc(20px * var(--scale));
+    padding: calc(10px * var(--scale)) calc(20px * var(--scale));
+    background-color: #3B82F6;
+    color: white;
+    border-radius: calc(8px * var(--scale));
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 50;
+    transition: background-color 0.3s;
+}
+
+#next-paragraph-button:disabled {
+    background-color: #9CA3AF;
+    cursor: not-allowed;
+}
+</style>
 </head>
+
 <body>
 
+<!-- 太陽 -->
+<img src="{{ url_for('static', filename='assets/backgrounds/sun_icon.png') }}"
+     alt="太陽"
+     class="sun-icon">
+
+<!-- 作文用紙 -->
 <div class="composition-paper" id="paper-viewport">
     <div id="story-container"></div>
 </div>
 
 <button id="next-paragraph-button" onclick="nextParagraph()">物語を読み込む...</button>
 
+<!-- ステージ -->
 <div class="stage-container">
     <div id="melos">
-        <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}" alt="メロス" style="width: 80px;">
+        <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}"
+             alt="メロス"
+             style="width: calc(500px * var(--scale));">
     </div>
 </div>
 
+<!-- BGM -->
 <audio id="bgm-player" loop>
     <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
 </audio>
 
 <script>
-    let storyData = [];
-    let storyLoaded = false;
-    let currentParagraphIndex = 0;
-    let typingIntervalId = null;
-    let melosPositionX = 0;
+let storyData = [];
+let storyLoaded = false;
+let currentParagraphIndex = 0;
+let typingIntervalId = null;
+let melosPositionX = 0;
 
-    const storyContainer = document.getElementById("story-container");
-    const paperViewport = document.getElementById("paper-viewport");
-    const nextButton = document.getElementById("next-paragraph-button");
-    const melos = document.getElementById("melos");
-    const bgmPlayer = document.getElementById("bgm-player");
+const storyContainer = document.getElementById("story-container");
+const paperViewport = document.getElementById("paper-viewport");
+const nextButton = document.getElementById("next-paragraph-button");
+const melos = document.getElementById("melos");
+const bgmPlayer = document.getElementById("bgm-player");
 
     const initialStory = ["メロスは激怒した。", 
                           "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
-                          "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語の内側だけでは終わらぬことを。"];
+                          "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"];
 
-    function updateMelosPosition() {
-        melosPositionX += 2;
-        if (melosPositionX > window.innerWidth) melosPositionX = -80;
-        melos.style.left = melosPositionX + "px";
-        requestAnimationFrame(updateMelosPosition);
-    }
+function updateMelosPosition() {
+    melosPositionX += 2;
+    if (melosPositionX > window.innerWidth) melosPositionX = -200;
+    melos.style.left = melosPositionX + "px";
+    requestAnimationFrame(updateMelosPosition);
+}
 
-    // 自動スクロール関数
-    function autoScroll() {
-        // direction: rtl の環境では scrollLeft を最小値（マイナス）にすると最新の左端を表示します
-        paperViewport.scrollLeft = -paperViewport.scrollWidth;
-    }
+function autoScroll() {
+    paperViewport.scrollLeft = -paperViewport.scrollWidth;
+}
 
-    function startTyping(text) {
-        if (!text) return;
-        if (typingIntervalId) clearInterval(typingIntervalId);
-        
-        const paraDiv = document.createElement("div");
-        paraDiv.className = "story-paragraph";
-        storyContainer.appendChild(paraDiv);
+function startTyping(text) {
+    if (!text) return;
+    if (typingIntervalId) clearInterval(typingIntervalId);
 
-        let charIdx = 0;
-        nextButton.disabled = true;
-        nextButton.textContent = "表示中...";
+    const paraDiv = document.createElement("div");
+    paraDiv.className = "story-paragraph";
+    storyContainer.appendChild(paraDiv);
 
-        typingIntervalId = setInterval(() => {
-            if (charIdx < text.length) {
-                paraDiv.textContent += text[charIdx];
-                charIdx++;
-                // 1文字ごとに最新の左端を追いかける
-                autoScroll();
-            } else {
-                clearInterval(typingIntervalId);
-                typingIntervalId = null;
-                nextButton.disabled = false;
-                nextButton.textContent = "次の段落へ";
-            }
-        }, 80);
-    }
+    let charIdx = 0;
+    nextButton.disabled = true;
+    nextButton.textContent = "表示中...";
 
-    window.nextParagraph = function () {
-        // ユーザー操作時にBGM再生
-        if (bgmPlayer && bgmPlayer.paused) {
-            bgmPlayer.play().catch(e => console.log("再生待ち"));
-        }
-
-        if (!storyLoaded) return;
-
-        if (currentParagraphIndex < storyData.length) {
-            startTyping(storyData[currentParagraphIndex]);
-            currentParagraphIndex++;
+    typingIntervalId = setInterval(() => {
+        if (charIdx < text.length) {
+            paraDiv.textContent += text[charIdx++];
+            autoScroll();
         } else {
-            const turn = parseInt("{{ turn }}") || 1;
-            window.location.href = (turn >= 4) ? "{{ url_for('ending') }}" : "{{ url_for('game') }}";
+            clearInterval(typingIntervalId);
+            typingIntervalId = null;
+            nextButton.disabled = false;
+            nextButton.textContent = "次の段落へ";
         }
-    };
+    }, 80);
+}
 
-    async function loadStoryJson() {
-        try {
-            const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
-            if (!response.ok) throw new Error("JSON not found");
-            const jsonData = await response.json();
-            storyData = initialStory.concat(jsonData.story);
-        } catch (e) {
-            storyData = initialStory;
-        }
+window.nextParagraph = function () {
+    if (bgmPlayer && bgmPlayer.paused) bgmPlayer.play().catch(() => {});
+    if (!storyLoaded) return;
 
+    if (currentParagraphIndex < storyData.length) {
+        startTyping(storyData[currentParagraphIndex++]);
+    } else {
         const turn = parseInt("{{ turn }}") || 1;
+        window.location.href = (turn >= 4)
+            ? "{{ url_for('ending') }}"
+            : "{{ url_for('game') }}";
+    }
+};
 
-        if (turn > 1) {
-            // 2ターン目以降：過去のログを即座に表示
-            for (let i = 0; i < storyData.length - 1; i++) {
-                const div = document.createElement("div");
-                div.className = "story-paragraph";
-                div.textContent = storyData[i];
-                storyContainer.appendChild(div);
-            }
-            currentParagraphIndex = storyData.length - 1;
-            nextButton.textContent = "続きを読み進める";
-            
-            // 過去ログを表示した直後に最新位置へスクロール
-            setTimeout(autoScroll, 100);
-        } else {
-            currentParagraphIndex = 0;
-            nextButton.textContent = "物語を始める";
-        }
-        storyLoaded = true;
+async function loadStoryJson() {
+    try {
+        const response = await fetch("{{ url_for('static', filename='data/story.json') }}");
+        const jsonData = await response.json();
+        storyData = initialStory.concat(jsonData.story);
+    } catch {
+        storyData = initialStory;
     }
 
-    loadStoryJson();
-    updateMelosPosition();
+    const turn = parseInt("{{ turn }}") || 1;
+
+    if (turn > 1) {
+        for (let i = 0; i < storyData.length - 1; i++) {
+            const div = document.createElement("div");
+            div.className = "story-paragraph";
+            div.textContent = storyData[i];
+            storyContainer.appendChild(div);
+        }
+        currentParagraphIndex = storyData.length - 1;
+        nextButton.textContent = "続きを読み進める";
+        setTimeout(autoScroll, 100);
+    } else {
+        currentParagraphIndex = 0;
+        nextButton.textContent = "物語を始める";
+    }
+
+    storyLoaded = true;
+}
+
+loadStoryJson();
+updateMelosPosition();
 </script>
+
 </body>
 </html>
