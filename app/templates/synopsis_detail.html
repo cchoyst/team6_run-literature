@@ -16,8 +16,24 @@
     </div>
 
     <div class="start-container">
-        <h1 style="font-size: 2.5em; margin-bottom: 20px;">{{ content.title }}</h1>
-        
+        <h1 style="
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        ">
+            {% if icon %}
+            <img
+                src="{{ url_for('static', filename='assets/characters/' ~ icon) }}"
+                alt="{{ content.title }} アイコン"
+                style="width: 56px; height: 56px; object-fit: contain;"
+            >
+            {% endif %}
+            {{ content.title }}
+        </h1>
+
         <div class="synopsis-box" style="
             text-align: left; 
             line-height: 2; 

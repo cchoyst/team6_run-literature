@@ -156,8 +156,11 @@ def start_game():
 # play.html（メロスが走る画面）
 @app.route("/play")
 def play():
+    # 1. セッションから現在のターンと感情を取得
     turn = session.get("turn", 1)
-    mood = session.get("current_mood", "neutral")
+    mood = session.get("current_mood", "neutral")  # デフォルトは neutral
+    
+    # 2. テンプレートに mood を渡す（これによりHTML側で {{ mood }} が使えます）
     return render_template("play.html", turn=turn, mood=mood)
 
 
@@ -403,7 +406,7 @@ def synopsis():
         {"id": "kokoro", "name": "こころ"},
         {"id": "chumon", "name": "注文の多い料理店"}
     ]
-    return render_template("synopsis.html", titles=titles, background_text=bg_text)
+    return render_template("synopsis.html", titles=titles, background_text=bg_text,work_icons=WORK_ICON_MAP)
 
 # あらすじ詳細画面（選択したタイトルのあらすじを表示）
 @app.route("/synopsis/<work_id>")
@@ -460,7 +463,8 @@ def synopsis_detail(work_id):
     }
     
     content = synopsis_data.get(work_id, {"title": "不明", "text": "内容が見つかりませんでした。"})
-    return render_template("synopsis_detail.html", content=content, background_text=bg_text)
+    icon = WORK_ICON_MAP.get(work_id)
+    return render_template("synopsis_detail.html", content=content, background_text=bg_text,icon=icon)
 
 # ----------------------------------------------------------------------------------
 # APIエンドポイント 3: LLMによるエンディングの生成 (省略)

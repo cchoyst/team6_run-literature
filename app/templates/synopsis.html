@@ -21,14 +21,33 @@
 
         {% for title in titles %}
         <div class="menu-item">
-            <a href="{{ url_for('synopsis_detail', work_id=title.id) }}">
-                {{ title.name }}
+            <a href="{{ url_for('synopsis_detail', work_id=title.id) }}"
+               style="
+                   display: flex;
+                   align-items: center;
+                   justify-content: center;
+                   gap: 15px;
+               ">
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='assets/characters/' ~ work_icons[title.id]
+                    ) }}"
+                    alt="{{ title.name }} アイコン"
+                    style="
+                        width: 48px;
+                        height: 48px;
+                        object-fit: contain;
+                    "
+                >
+                <span>{{ title.name }}</span>
             </a>
         </div>
         {% endfor %}
 
         <div class="menu-item" style="margin-top: 30px;">
-            <a href="{{ url_for('index') }}" style="background-color: #95a5a6; min-width: 150px; font-size: 1.2em; padding: 10px 30px;">
+            <a href="{{ url_for('index') }}"
+               style="background-color: #95a5a6; min-width: 150px; font-size: 1.2em; padding: 10px 30px;">
                 戻る
             </a>
         </div>
@@ -37,7 +56,9 @@
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('bgm-player');
-            if (audio) { audio.play().catch(e => console.log("Playback blocked")); }
+            if (audio) {
+                audio.play().catch(e => console.log("Playback blocked"));
+            }
         });
     </script>
 </body>
