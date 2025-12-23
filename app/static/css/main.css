@@ -157,7 +157,7 @@ button {
   position: absolute;
   width: 7%;
   height: auto;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(-90deg);
   z-index: 1;
 }
 
@@ -211,6 +211,8 @@ button {
   position: absolute;
   width: 28%;
   left: 72%;
+  top: 0;
+  transform: translateY(-50%);
   z-index: 2;
 }
 
