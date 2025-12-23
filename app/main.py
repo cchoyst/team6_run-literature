@@ -156,8 +156,11 @@ def start_game():
 # play.html（メロスが走る画面）
 @app.route("/play")
 def play():
+    # 1. セッションから現在のターンと感情を取得
     turn = session.get("turn", 1)
-    mood = session.get("current_mood", "neutral")
+    mood = session.get("current_mood", "neutral")  # デフォルトは neutral
+    
+    # 2. テンプレートに mood を渡す（これによりHTML側で {{ mood }} が使えます）
     return render_template("play.html", turn=turn, mood=mood)
 
 
