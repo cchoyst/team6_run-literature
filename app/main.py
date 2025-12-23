@@ -54,6 +54,21 @@ EMOTION_LABELS = {
     "neutral": "ふつう"
 }
 
+PHASE_INSTRUCTIONS = {
+    1: "物語の『承』です。状況が動き出し、登場人物の行動が意味を持ち始めます。",
+    2: "物語の『転』です。不安や違和感が生まれ、物語の方向性が揺らぎます。",
+    3: "物語の『落』です。結末に向かう決定的な心情や選択を描いてください。"
+}
+
+SERINENTIUS_RULE = (
+    "【エンディング必須演出】\n"
+    "- メロスはセリヌンティウスのもとへ向かい、辿り着く過程または瞬間を描くこと\n"
+    "- 再会の成否は描写しても、描写しなくてもよい\n"
+    "- 友情・信義・約束の重みが行動の理由として滲むように描写する\n"
+    "- セリヌンティウスの名を明示的に一度以上記すこと\n\n"
+)
+
+
 def attach_icons(options):
     """各 option に icon_filename キーを追加するヘルパー。"""
     for opt in options:
@@ -193,64 +208,95 @@ def reset_story():
 
 @app.route("/choose", methods=["POST"])
 def choose():
-    # 1. フォームデータの取得（HTML側が ['mood'] でも .mood でも取れるようにする）
+    # --- 1. フォームデータ取得 ---
     chosen_text = request.form.get("chosen_text", "")
     chosen_mood = request.form.get("selected_mood") or "neutral"
     next_theme = request.form.get("next_theme", "友情")
     current_work = request.form.get("current_work", "走れメロス")
 
-    print(f"--- ユーザーが選択した感情: {chosen_mood} ---")
-
-    # 2. セッションの更新（ここをLLM生成より先に行う）
+    # --- 2. セッション更新 ---
     history = session.get("history", [])
     history.append(chosen_mood)
-    
     session["history"] = history
     session["current_mood"] = chosen_mood
+
     turn = session.get("turn", 1)
     session["turn"] = turn + 1
     session.modified = True
 
-    # 3. LLMによる文章生成（内部のロジックを直接呼ぶ）
-    # 外部への requests.post("http://127.0.0.1:5000/...") はデッドロックの原因になるので避ける
+    # --- 3. LLM による文章生成 ---
     try:
-        # これまでのストーリーを読み込む
         story_data = load_story()
         previous_story = "\n".join(story_data.get("story", []))
 
+        phase_instruction = PHASE_INSTRUCTIONS.get(turn, "")
+        serinentius_instruction = ""
+        if session["turn"] == 3:
+            serinentius_instruction = SERINENTIUS_RULE
+        
+        # --- system instruction（物語ルール） ---
         system_instruction = (
-            "あなたは物語の語り手です。\n"
-            f"これまでのあらすじ：{previous_story}\n"
-            f"メロスの今の行動：{chosen_text} (作品：{current_work}, 感情：{chosen_mood})\n"
-            f"次のテーマ：{next_theme}\n"
-            "これらを踏まえ、次のシーンへ繋ぐ150字以内の文章を生成してください。"
+            "あなたは文学作品の語り手です。\n"
+            "この物語は『走れメロス』を軸に、他の文学作品の世界が交錯するクロスワールドです。\n\n"
+            
+            "【重要な世界観ルール】\n"
+            "- メロスは常に走り続けている存在であり、立ち止まらない\n"
+            "- 他の文学作品の人物・言葉・空間は、道中に『割り込む』『語りかける』『影のように現れる』\n"
+            "- メロスと他作品は、完全に理解し合わなくてよい。すれ違いや違和感を大切にする\n\n"
+            
+            "【文章表現の制約】\n"
+            "- 出力は地の文のみ（解説・説明は禁止）\n"
+            "- 150字以内の一段落\n"
+            "- 意味や印象の切れ目で改行を入れてよい\n"
+            
+            f"【物語フェーズ】\n{phase_instruction}\n\n"
+            f"{serinentius_instruction}"
+            f"【これまでの物語】\n{previous_story}\n"
         )
 
+        # --- user prompt（今回の場面指示） ---
+        user_prompt = (
+            f"メロスは走りながら「{chosen_text}」と口にした。\n"
+            f"その瞬間、彼の前に「{current_work}」の世界の気配が滲み出す。\n"
+            f"彼の感情は「{chosen_mood}」。\n"
+            f"物語は「{next_theme}」の兆しを帯びる。\n"
+            "この交錯が、次の場面へ自然につながるよう描写せよ。"
+        )
+
+
         payload = {
-            "contents": [{"parts": [{"text": f"メロスは{chosen_text}と言い、{next_theme}の世界へ向かった。"}]}],
-            "systemInstruction": {"parts": [{"text": system_instruction}]}
+            "contents": [
+                {"parts": [{"text": user_prompt}]}
+            ],
+            "systemInstruction": {
+                "parts": [{"text": system_instruction}]
+            }
         }
-        
-        # 直接 Gemini API を叩く
-        res = requests.post(f"{GEMINI_API_URL}?key={GEMINI_API_KEY}", json=payload, timeout=10)
+
+        res = requests.post(
+            f"{GEMINI_API_URL}?key={GEMINI_API_KEY}",
+            json=payload,
+            timeout=10
+        )
         res.raise_for_status()
-        
-        scene_text = res.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+
+        scene_text = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
         story_data["story"].append(scene_text)
         save_story(story_data)
 
     except Exception as e:
         print(f"LLM Generation Error: {e}")
-        # 万が一生成に失敗しても、物語が止まらないよう仮の文章を入れる
+        # フォールバック（物語が止まらないため）
         story_data = load_story()
-        story_data["story"].append(f"メロスは{next_theme}の予感を感じながら先を急いだ。")
+        story_data["story"].append(
+            f"メロスは{next_theme}の気配を胸に抱いたまま、歩みを止めなかった。"
+        )
         save_story(story_data)
 
-    # 4. 進行判定
-    # 3回選択した後の4回目の文章生成が終わったらエンディングへ
+    # --- 4. 進行判定 ---
     if session["turn"] > 4:
         return redirect(url_for("ending"))
-    
+
     return redirect(url_for("play"))
 
 
@@ -274,7 +320,9 @@ def ending():
     generated_story = story_data.get("story", [])
 
     # 初期文章（固定）
-    initial_story = ["メロスは激怒した。必ずや、かの邪智暴虐の王を除かなければならぬと決意した。"]
+    initial_story = ["メロスは激怒した。",
+                     "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
+                     "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語の内側だけでは終わらぬことを。"]
     
     # 全文章を結合
     full_story = initial_story + generated_story
@@ -335,70 +383,8 @@ def save_story(story_data):
     with open(STORY_PATH, "w", encoding="utf-8") as f:
         json.dump(story_data, f, ensure_ascii=False, indent=2)
 
-@app.route('/api/generate_scene_text', methods=['POST'])
-def generate_scene_text():
-    """
-    プレイヤーの選択と次のテーマ、さらに story.json の履歴を踏まえて
-    物語の続きを生成し、段落ごとに保存する
-    """
-    if not GEMINI_API_KEY or GEMINI_API_KEY == "YOUR_FALLBACK_API_KEY":
-        return jsonify({"error": "Gemini API key is not configured on the server."}), 503
 
-    try:
-        data = request.get_json()
-        chosen_text = data.get('chosen_text', '')
-        chosen_mood = data.get('chosen_mood', 'calm')
-        next_theme = data.get('next_theme', '友情')
-        current_work = data.get('current_work', '走れメロス')
 
-        ### 追加：これまでのストーリー読み込み
-        story_data = load_story()
-        previous_story = "\n".join(story_data["story"])  # LLM 用にまとめる
-
-        system_instruction = (
-            "あなたは物語の語り手です。"
-            "以下はこれまでのストーリー全体です：\n"
-            f"{previous_story}\n\n"
-            "主人公メロスは、今「走れメロス」から離れて別作品の世界へ向かう。"
-            f"直前のメロスの選択は「{chosen_text}」（作品：{current_work}, 感情：{chosen_mood}）である。"
-            f"次の主題は「{next_theme}」である。\n"
-            "この流れを自然につなぐ新しい段落を 150字以内で生成せよ。"
-            "縦書きに向くように改行を含めてもよい。"
-            "段落は1つだけ生成し、決して長編にしない。"
-        )
-
-        user_prompt = (
-            f"メロスが「{chosen_text}」と言った。次の主題は「{next_theme}」。"
-            "この場面転換をつなぐ新しい段落を生成してください。"
-        )
-
-        payload = {
-            "contents": [{"parts": [{"text": user_prompt}]}],
-            "systemInstruction": {"parts": [{"text": system_instruction}]}
-        }
-        
-        response = requests.post(f"{GEMINI_API_URL}?key={GEMINI_API_KEY}", json=payload)
-        response.raise_for_status()
-
-        result = response.json()
-        scene_text = result['candidates'][0]['content']['parts'][0]['text']
-
-        ### 追加：段落として JSON に追加
-        new_paragraph = scene_text.strip()
-        story_data["story"].append(new_paragraph)
-
-        ### 追加：保存
-        save_story(story_data)
-
-        return jsonify({
-            "scene_text": new_paragraph,
-            "next_mood": chosen_mood
-        })
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": "Gemini APIとの通信に失敗しました。", "details": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": "場面生成中に予期せぬエラー。", "details": str(e)}), 500
 
 # ----------------------------------------------------------------------------------
 # ★ 新規追加部分：あらすじ機能
