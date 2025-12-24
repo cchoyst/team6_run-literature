@@ -326,11 +326,12 @@ def ending():
     generated_story = story_data.get("story", [])
 
     # 初期文章（固定）
-    initial_story = ["メロスは激怒した。必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
-                     "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"]
+    initial_story = ["メロスは激怒した。必ずや、かの邪智暴虐の王を除かなければならぬと決意した。\n\n走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"]
     
     # 全文章を結合
     full_story = initial_story + generated_story
+
+    print(full_story)
 
     return render_template(
         "ending.html",
