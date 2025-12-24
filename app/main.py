@@ -176,6 +176,11 @@ def game():
     # 【重要】optionsの中身が辞書(dict)であることを確認し、アイコンを付与
     options = attach_icons(options)
 
+    print("==== options ====")
+    for i, opt in enumerate(options):
+        print(f"[{i}]", opt)
+    print("=================")
+
     return render_template(
         "game.html",
         options=options,  # 辞書のリストとして渡す

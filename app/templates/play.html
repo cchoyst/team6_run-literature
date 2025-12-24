@@ -30,6 +30,11 @@ body[data-turn="3"] {
     background-color: #1E2A5A; /* 藍色 */
 }
 
+/* ターン4：昼 */
+body[data-turn="4"] {
+    background-color: #FFC0CB; /* スカイブルー */
+}
+
 /* ===== 太陽 ===== */
 .sun-icon {
     position: fixed;
@@ -138,6 +143,46 @@ body[data-turn="3"] {
     cursor: not-allowed;
     box-shadow: none;
 }
+
+#trail-icon {
+    position: absolute;
+    bottom: calc(60px * var(--scale));
+    width: calc(90px * var(--scale));
+    height: calc(90px * var(--scale));
+
+    z-index: 8; /* メロスより後ろ */
+    pointer-events: none;
+}
+
+/* ===== ローディング画面 ===== */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: all;
+}
+
+#loading-text {
+    font-size: calc(2rem * var(--scale));
+    color: #fffdf5;
+    letter-spacing: 0.2em;
+    font-weight: bold;
+
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%   { opacity: 0.4; }
+    50%  { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
 </style>
 </head>
 
@@ -162,6 +207,9 @@ body[data-turn="3"] {
              style="width: calc(500px * var(--scale));">
     </div>
 </div>
+
+<!-- 追従アイコン -->
+<div id="trail-icon"></div>
 
 <audio id="bgm-player" loop>
     <source src="{{ url_for('static', filename='assets/sounds/' ~ (mood if mood else 'neutral') ~ '.mp3') }}" type="audio/mpeg">
@@ -222,6 +270,37 @@ function startTyping(text) {
     }, 80);
 }
 
+const trailIcon = document.getElementById("trail-icon");
+const chosenIcon = localStorage.getItem("chosenIcon");
+
+// アイコンがあれば表示
+if (chosenIcon) {
+    trailIcon.innerHTML = `
+        <img src="/static/assets/characters/${chosenIcon}"
+             style="width: 100%; height: 100%; object-fit: contain;">
+    `;
+}
+
+// 遅延用変数
+let trailX = -300;
+
+function updateMelosPosition() {
+    melosPositionX += 2;
+
+    if (melosPositionX > window.innerWidth) {
+        melosPositionX = -200;
+        trailX = -300;
+    }
+
+    melos.style.left = melosPositionX + "px";
+
+    // ★ 少し遅れて追従
+    trailX += (melosPositionX - trailX - 120) * 0.08;
+    trailIcon.style.left = trailX + "px";
+
+    requestAnimationFrame(updateMelosPosition);
+}
+
 window.nextParagraph = function () {
     if (bgmPlayer && bgmPlayer.paused) bgmPlayer.play().catch(() => {});
 
@@ -231,11 +310,28 @@ window.nextParagraph = function () {
         startTyping(storyData[currentParagraphIndex++]);
     } else {
         const turn = parseInt("{{ turn }}") || 1;
-        window.location.href = (turn >= 4)
-            ? "{{ url_for('ending') }}"
-            : "{{ url_for('game') }}";
+        const overlay = document.getElementById("loading-overlay");
+        const text = document.getElementById("loading-text");
+
+        // 表示文言を分岐
+        if (turn >= 4) {
+            text.textContent = "エンディングへ…";
+        } else {
+            text.textContent = "読み込み中…";
+        }
+
+        // ロード画面表示
+        overlay.style.display = "flex";
+
+        // 少し待ってから遷移（演出用）
+        setTimeout(() => {
+            window.location.href = (turn >= 4)
+                ? "{{ url_for('ending') }}"
+                : "{{ url_for('game') }}";
+        }, 600);
     }
 };
+
 
 async function loadStoryJson() {
     try {
@@ -268,7 +364,13 @@ async function loadStoryJson() {
 
 loadStoryJson();
 updateMelosPosition();
+
 </script>
+
+<!-- ===== ローディングオーバーレイ ===== -->
+<div id="loading-overlay">
+    <div id="loading-text">読み込み中…</div>
+</div>
 
 </body>
 </html>
