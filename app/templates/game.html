@@ -44,7 +44,7 @@
     <h1 class="game-title">走れ文学</h1>
     <div class="game-status">
       <span>ターン: {{ turn }}</span>
-      <span>気分: {{ mood }}</span>
+      <span>現在の気分: {{ mood }}</span>
     </div>
   </header>
 
@@ -96,7 +96,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[0]['icon_filename']) }}">
-          <span class="option-text">{{ options[0]['text'] }}</span>
+          <span class="option-text"> {{ options[0]['text'] }}（→ {{ options[0]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
@@ -106,9 +106,9 @@
     {% if options|length > 1 %}
     <form action="{{ url_for('choose') }}" method="POST" class="option-form slot-middle">
       <input type="hidden" name="chosen_text" value="{{ options[1]['text'] }}">
-      <input type="hidden" name="selected_mood" value="{{ options[1]['mood'] }}">
-      <input type="hidden" name="current_work" value="{{ options[1]['work_title'] }}">
-      <input type="hidden" name="next_theme" value="{{ options[1]['theme'] }}">
+      <input type="hidden" name="selected_mood" value="{{ options[1]['next_mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[1]['work_id'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[1]['next_mood'] }}">
 
       <button type="submit"
               class="speech-bubble"
@@ -117,7 +117,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[1]['icon_filename']) }}">
-          <span class="option-text">{{ options[1]['text'] }}</span>
+          <span class="option-text">{{ options[1]['text'] }}（→ {{ options[1]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
@@ -127,9 +127,9 @@
     {% if options|length > 2 %}
     <form action="{{ url_for('choose') }}" method="POST" class="option-form slot-bottom">
       <input type="hidden" name="chosen_text" value="{{ options[2]['text'] }}">
-      <input type="hidden" name="selected_mood" value="{{ options[2]['mood'] }}">
-      <input type="hidden" name="current_work" value="{{ options[2]['work_title'] }}">
-      <input type="hidden" name="next_theme" value="{{ options[2]['theme'] }}">
+      <input type="hidden" name="selected_mood" value="{{ options[2]['next_mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[2]['work_id'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[2]['next_mood'] }}">
 
       <button type="submit"
               class="speech-bubble"
@@ -138,7 +138,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[2]['icon_filename']) }}">
-          <span class="option-text">{{ options[2]['text'] }}</span>
+          <span class="option-text">{{ options[2]['text'] }}（→ {{ options[2]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
