@@ -135,6 +135,7 @@ button {
 /* 分岐する道（上・下） */
 .branch-road {
   left: 32%;
+  top: var(--lane-middle);
   width: 30%;
   height: var(--road-thick);
   transform-origin: left center;
@@ -142,13 +143,13 @@ button {
 }
 
 .branch-top {
-  top: var(--lane-middle);
-  transform: translateY(-50%) rotate(-18deg);
+  transform: translateY(-50%) rotate(-25deg);
+  width: 32%;
 }
 
 .branch-bottom {
-  top: var(--lane-middle);
-  transform: translateY(-50%) rotate(18deg);
+  transform: translateY(-50%) rotate(25deg);
+  width: 32%;
 }
 
 .center-road {
@@ -162,18 +163,31 @@ button {
   border-bottom-right-radius: 999px;
 }
 
+.branch-hub {
+  position: absolute;
+  left: 32%;
+  top: var(--lane-middle);
+  width: 14vh;
+  height: 14vh;
+  background: #bf5b1f;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+
 /* 土管 */
 .pipe {
   position: absolute;
   width: 7%;
   height: auto;
-  transform: translateY(-55%) rotate(-90deg);
+  transform: translateY(-50%) rotate(-90deg);
   z-index: 1;
 }
 
 /* 右側3本：それぞれのレーンの中心 */
 .pipe-right {
-  left: 62%; 
+  left: 60%; 
 }
 
 .pipe-top {
