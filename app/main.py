@@ -48,7 +48,7 @@ DEFAULT_ICON = "sun_icon.png"
 EMOTION_LABELS = {
     "hopeful": "希望",
     "angry": "激怒",
-    "melancholic": "憂鬱・哀愁",
+    "melancholic": "哀愁",
     "anxious": "不安",
     "calm": "平静",
     "neutral": "ふつう"

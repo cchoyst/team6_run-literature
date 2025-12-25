@@ -25,28 +25,43 @@ model = genai.GenerativeModel(MODEL_NAME)
 MAX_QUOTES_PER_CALL = 12
 
 
-SYSTEM_MSG = """
-あなたは日本文学を題材にしたマルチエンディングゲームのシナリオ生成AIです。
-与えられた引用リストと現在の mood をもとに、
-プレイヤーに提示する「次の選択肢 3 個」を JSON 形式で返してください。
+SYSTEM_MSG = SYSTEM_MSG = """
+  あなたは日本文学を題材にしたマルチエンディングゲームのシナリオ生成AIです。
+  与えられた引用リスト（CSV データ）と現在の mood をもとに、
+  プレイヤーに提示する「次の選択肢 3 個」を JSON 形式で返してください。
 
-各選択肢は、引用の雰囲気を活かした短いセリフにしてください。
-また、各選択肢ごとに次の mood を "next_mood" として指定してください。
+  【最重要ルール】
+  - 各選択肢の "text" は、【必ず CSV データ内の quote の text をそのまま使用してください】
+  - セリフを要約・言い換え・創作してはいけません
+  - text は CSV に含まれる文章と 完全一致させてください
 
-【指定可能な next_mood】
-"hopeful", "angry", "melancholic", "anxious", "calm", "neutral"
+  【感情に関するルール】
+  - 3つの選択肢の next_mood は、【可能な限りすべて異なる感情】にしてください
+  - 現在の mood と同じ next_mood は出来るだけ選ばないでください
+  - 3ターン程度で感情が変化し、終点（希望・静けさ・絶望など）に到達する物語の流れを意識してください
+  - 感情の変化例（あくまで例）：
+    calm → melancholic → hopeful
+    anxious → angry → calm
 
-出力は必ず次の形式の JSON **だけ** にしてください。
-各 options[i] の "work_id" には、引用に対応する work_id を 1 つ入れてください。
 
-{
-  "options": [
-    {"id": 1, "text": "選択肢1のセリフ", "next_mood": "hope",   "work_id": "hashire"},
-    {"id": 2, "text": "選択肢2のセリフ", "next_mood": "despair","work_id": "kokoro"},
-    {"id": 3, "text": "選択肢3のセリフ", "next_mood": "neutral","work_id": "lemon"}
-  ]
-}
+  【指定可能な next_mood】
+  "hopeful", "angry", "melancholic", "anxious", "calm"
+
+  【work_id について】
+  - 各選択肢の "work_id" は、その text が元になっている引用の work_id を入れてください
+
+  出力は必ず次の形式の JSON だけにしてください。
+  各 options[i] の "work_id" には、引用に対応する work_id を 1 つ入れてください。
+
+  {
+    "options": [
+      {"id": 1, "text": "CSV内の引用文そのまま", "next_mood": "hope",   "work_id": "hashire"},
+      {"id": 2, "text": "CSV内の引用文そのまま", "next_mood": "despair","work_id": "kokoro"},
+      {"id": 3, "text": "CSV内の引用文そのまま", "next_mood": "neutral","work_id": "lemon"}
+    ]
+  }
 """.strip()
+
 
 
 def _extract_text(response: Any) -> str:
