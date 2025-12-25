@@ -169,6 +169,7 @@ def play():
 def game():
     turn = session.get("turn", 1)
     current_mood = session.get("current_mood", "neutral")
+    current_mood_label = EMOTION_LABELS.get(current_mood, current_mood)
 
     # 現在の感情に応じた選択肢を生成
     options = generate_options_from_csv(current_mood)
@@ -185,6 +186,8 @@ def game():
         "game.html",
         options=options,  # 辞書のリストとして渡す
         mood=current_mood,
+        mood_label=current_mood_label,
+        emotion_labels=EMOTION_LABELS,
         turn=turn,
     )
 

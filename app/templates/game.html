@@ -72,7 +72,7 @@
   <header class="game-header">
     <div class="game-status">
       <span>ターン: {{ turn }}</span>
-      <span>現在の気分: {{ mood }}</span>
+      <span>現在の気分: {{ mood_label }}</span>
     </div>
   </header>
 
@@ -125,7 +125,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[0]['icon_filename']) }}">
-          <span class="option-text"> {{ options[0]['text'] }}（→ {{ options[0]['next_mood'] }}）</span>
+          <span class="option-text"> {{ options[0]['text'] }}（→ {{ emotion_labels.get(options[0]['next_mood'], options[0]['next_mood']) }}）</span>
         </span>
       </button>
     </form>
@@ -146,7 +146,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[1]['icon_filename']) }}">
-          <span class="option-text">{{ options[1]['text'] }}（→ {{ options[1]['next_mood'] }}）</span>
+          <span class="option-text">{{ options[1]['text'] }}（→ {{ emotion_labels.get(options[1]['next_mood'], options[1]['next_mood']) }}）</span>
         </span>
       </button>
     </form>
@@ -167,7 +167,7 @@
         <span class="option-content">
           <img class="option-icon"
                src="{{ url_for('static', filename='assets/characters/' ~ options[2]['icon_filename']) }}">
-          <span class="option-text">{{ options[2]['text'] }}（→ {{ options[2]['next_mood'] }}）</span>
+          <span class="option-text">{{ options[2]['text'] }}（→ {{ emotion_labels.get(options[2]['next_mood'], options[2]['next_mood']) }}）</span>
         </span>
       </button>
     </form>
