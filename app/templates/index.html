@@ -24,7 +24,7 @@
             <a href="{{ url_for('synopsis') }}">あらすじ</a>
         </div>
         <div class="menu-item">
-            <a href="#" onclick="alert('設定機能は開発中です'); return false;">設定</a>
+            <a href="{{ url_for('operate') }}">遊び方</a>
         </div>
     </div>
 
@@ -45,6 +45,8 @@
                 audio.play();
             }
         }, { once: true }); // 最初の1クリック目だけ実行
+
+        localStorage.removeItem("chosenIcon");
     </script>
 </body>
 </html>

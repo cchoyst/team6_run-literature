@@ -64,6 +64,12 @@
         .btn-restart:hover {
             background-color: #6d5942;
         }
+        
+        .story-separator {
+            border: none;
+            border-top: 1px solid #d3c4a9;
+            margin: 30px 0;
+        }
     </style>
 </head>
 <body>
@@ -77,7 +83,7 @@
             <h1>エンディング</h1>
             
             <p class="final-emotion-text">
-                あなたの最終的な感情は<strong>「{{ final_label }}」</strong>でした
+                メロスの最終的な感情は<strong>「{{ final_label }}」</strong>でした
             </p>
 
             <p class="mood-trace">
@@ -93,7 +99,13 @@
             <h2>あなたの物語</h2>
             <div class="story-content">
                 {% for paragraph in story_text %}
-                    <p class="story-paragraph">{{ paragraph | replace('\n', '<br>') | safe }}</p>
+                    <p class="story-paragraph">
+                        {{ paragraph | replace('\n', '<br>') | safe }}
+                    </p>
+
+                    {% if not loop.last %}
+                        <hr class="story-separator">
+                    {% endif %}
                 {% endfor %}
             </div>
         </section>

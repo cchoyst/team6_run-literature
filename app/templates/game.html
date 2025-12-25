@@ -4,8 +4,63 @@
   <meta charset="UTF-8" />
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/main.css') }}">
+  
+  <style>
+  /* ===== game.html：ターンごとの空 ===== */
+  /* ターン1：昼 */
+  body[data-turn="1"] .game-sky {
+      background-color: #87CEEB;
+  }
+
+  /* ターン2：夕方 */
+  body[data-turn="2"] .game-sky {
+      background-color: #F4A261;
+  }
+
+  /* ターン3：夜 */
+  body[data-turn="3"] .game-sky {
+      background-color: #1E2A5A;
+  }
+
+  /* ターン4：朝（ピンク） */
+  body[data-turn="4"] .game-sky {
+      background-color: #FFC0CB;
+  }
+
+  /* ===== ローディング画面 ===== */
+  #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9999;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      pointer-events: all;
+  }
+
+  #loading-text {
+      font-size: 2rem;
+      color: #fffdf5;
+      letter-spacing: 0.2em;
+      font-weight: bold;
+
+      animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+      0%   { opacity: 0.4; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.4; }
+  }
+
+  </style>
+
 </head>
-<body class="game-body">
+
+<body class="game-body" data-turn="{{ turn }}">
 
 <audio id="game-bgm" loop autoplay>
   <source src="{{ url_for('static', filename='assets/sounds/selection.mp3') }}" type="audio/mpeg">
@@ -13,28 +68,26 @@
 
 <div class="game-wrapper">
 
+  <!-- ===== ヘッダー ===== -->
   <header class="game-header">
     <div class="game-status">
       <span>ターン: {{ turn }}</span>
-      <span>気分: {{ mood }}</span>
+      <span>現在の気分: {{ mood }}</span>
     </div>
   </header>
 
+  <!-- ===== 空 ===== -->
   <div class="game-sky">
     <div class="cloud-row">
-      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}"
-           alt="" class="cloud-img">
-      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.png') }}"
-           alt="" class="cloud-img">
-      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}"
-           alt="" class="cloud-img">
-      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.png') }}"
-           alt="" class="cloud-img">
-      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}"
-           alt="" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.png') }}" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_2.png') }}" class="cloud-img">
+      <img src="{{ url_for('static', filename='assets/backgrounds/cloud_icon_1.png') }}" class="cloud-img">
     </div>
   </div>
 
+  <!-- ===== ステージ ===== -->
   <div class="game-stage">
 
     <div class="stage-bg-css">
@@ -44,65 +97,83 @@
       <div class="road branch-road branch-bottom"></div>
 
       <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
-           alt="" class="pipe pipe-right pipe-top">
+           class="pipe pipe-right pipe-top">
       <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
-           alt="" class="pipe pipe-right pipe-middle">
+           class="pipe pipe-right pipe-middle">
       <img src="{{ url_for('static', filename='assets/backgrounds/pipe.png') }}"
-           alt="" class="pipe pipe-right pipe-bottom">
+           class="pipe pipe-right pipe-bottom">
     </div>
 
+    <!-- ===== メロス ===== -->
     <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}"
-         alt="メロス" class="runner">
+         alt="メロス"
+         class="runner">
 
+    <!-- ===== 選択肢① ===== -->
     {% if options|length > 0 %}
-    <form action="/choose" method="POST" class="option-form slot-top">
+    <form action="{{ url_for('choose') }}" method="POST" class="option-form slot-top">
       <input type="hidden" name="chosen_text" value="{{ options[0]['text'] }}">
       <input type="hidden" name="selected_mood" value="{{ options[0]['next_mood'] }}">
       <input type="hidden" name="current_work" value="{{ options[0]['work_id'] }}">
-      <input type="hidden" name="next_theme" value="{{ options[0]['next_mood'] }}"> 
-      
-      <button type="submit" class="speech-bubble">
+      <input type="hidden" name="next_theme" value="{{ options[0]['next_mood'] }}">
+
+      <button type="submit"
+              class="speech-bubble"
+              data-icon="{{ options[0]['icon_filename'] }}"
+              onclick="saveIcon(this)">
         <span class="option-content">
-          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[0]['icon_filename']) }}">
-          <span class="option-text">{{ options[0]['text'] }}</span>
+          <img class="option-icon"
+               src="{{ url_for('static', filename='assets/characters/' ~ options[0]['icon_filename']) }}">
+          <span class="option-text"> {{ options[0]['text'] }}（→ {{ options[0]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
     {% endif %}
 
+    <!-- ===== 選択肢② ===== -->
     {% if options|length > 1 %}
-    <form method="post" action="{{ url_for('choose') }}" class="option-form slot-middle">
+    <form action="{{ url_for('choose') }}" method="POST" class="option-form slot-middle">
       <input type="hidden" name="chosen_text" value="{{ options[1]['text'] }}">
-      <input type="hidden" name="selected_mood" value="{{ options[1]['mood'] }}"> 
-      <input type="hidden" name="current_work" value="{{ options[1]['work_title'] }}">
-      <input type="hidden" name="next_theme" value="{{ options[1]['theme'] }}">
-      
-      <button type="submit" class="speech-bubble">
+      <input type="hidden" name="selected_mood" value="{{ options[1]['next_mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[1]['work_id'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[1]['next_mood'] }}">
+
+      <button type="submit"
+              class="speech-bubble"
+              data-icon="{{ options[1]['icon_filename'] }}"
+              onclick="saveIcon(this)">
         <span class="option-content">
-          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[1]['icon_filename']) }}">
-          <span class="option-text">{{ options[1]['text'] }}</span>
+          <img class="option-icon"
+               src="{{ url_for('static', filename='assets/characters/' ~ options[1]['icon_filename']) }}">
+          <span class="option-text">{{ options[1]['text'] }}（→ {{ options[1]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
     {% endif %}
 
+    <!-- ===== 選択肢③ ===== -->
     {% if options|length > 2 %}
-    <form method="post" action="{{ url_for('choose') }}" class="option-form slot-bottom">
+    <form action="{{ url_for('choose') }}" method="POST" class="option-form slot-bottom">
       <input type="hidden" name="chosen_text" value="{{ options[2]['text'] }}">
-      <input type="hidden" name="selected_mood" value="{{ options[2]['mood'] }}">
-      <input type="hidden" name="current_work" value="{{ options[2]['work_title'] }}">
-      <input type="hidden" name="next_theme" value="{{ options[2]['theme'] }}">
-      
-      <button type="submit" class="speech-bubble">
+      <input type="hidden" name="selected_mood" value="{{ options[2]['next_mood'] }}">
+      <input type="hidden" name="current_work" value="{{ options[2]['work_id'] }}">
+      <input type="hidden" name="next_theme" value="{{ options[2]['next_mood'] }}">
+
+      <button type="submit"
+              class="speech-bubble"
+              data-icon="{{ options[2]['icon_filename'] }}"
+              onclick="saveIcon(this)">
         <span class="option-content">
-          <img class="option-icon" src="{{ url_for('static', filename='assets/characters/' ~ options[2]['icon_filename']) }}">
-          <span class="option-text">{{ options[2]['text'] }}</span>
+          <img class="option-icon"
+               src="{{ url_for('static', filename='assets/characters/' ~ options[2]['icon_filename']) }}">
+          <span class="option-text">{{ options[2]['text'] }}（→ {{ options[2]['next_mood'] }}）</span>
         </span>
       </button>
     </form>
     {% endif %}
   </div>
 
+  <!-- ===== フッター ===== -->
   <footer class="game-footer">
     <form method="get" action="{{ url_for('index') }}">
       <button type="submit" class="restart-button">
@@ -113,14 +184,33 @@
 
 </div>
 
+<!-- ===== JavaScript ===== -->
 <script>
+  // BGM再生対策
   window.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('game-bgm');
     if (audio) {
-      audio.play().catch(e => console.log("再生にはユーザー操作が必要です"));
+      audio.play().catch(() => {});
     }
+
+    // すべてのフォームにローディング処理を仕込む
+    document.querySelectorAll("form.option-form").forEach(form => {
+      form.addEventListener("submit", () => {
+        document.getElementById("loading-overlay").style.display = "flex";
+      });
+    });
   });
+
+  function saveIcon(button) {
+    const iconFilename = button.dataset.icon;
+    localStorage.setItem("chosenIcon", iconFilename);
+  }
 </script>
+
+<!-- ===== ローディングオーバーレイ ===== -->
+<div id="loading-overlay">
+    <div id="loading-text">文章生成中…</div>
+</div>
 
 </body>
 </html>

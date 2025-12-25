@@ -14,12 +14,25 @@
     --scale: 1.22;
 }
 
-/* ===== 基本 ===== */
-body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background-color: #87CEEB;
-    overflow: hidden;
-    margin: 0;
+/* ===== 背景：ターンごとの空 ===== */
+/* ターン1：昼 */
+body[data-turn="1"] {
+    background-color: #87CEEB; /* スカイブルー */
+}
+
+/* ターン2：夕方（オレンジ） */
+body[data-turn="2"] {
+    background-color: #F4A261; /* 夕焼けオレンジ */
+}
+
+/* ターン3：夜（藍色） */
+body[data-turn="3"] {
+    background-color: #1E2A5A; /* 藍色 */
+}
+
+/* ターン4：昼 */
+body[data-turn="4"] {
+    background-color: #FFC0CB; /* スカイブルー */
 }
 
 /* ===== 太陽 ===== */
@@ -95,43 +108,98 @@ body {
     z-index: 10;
 }
 
-/* ===== ボタン ===== */
+/* ===== ボタン（改善済） ===== */
 #next-paragraph-button {
-    position: absolute;
-    top: calc(20px * var(--scale));
-    right: calc(20px * var(--scale));
-    padding: calc(10px * var(--scale)) calc(20px * var(--scale));
-    background-color: #3B82F6;
-    color: white;
-    border-radius: calc(8px * var(--scale));
+    position: fixed;
+    bottom: calc(30px * var(--scale));
+    left: 50%;
+    transform: translateX(-50%);
+
+    padding: calc(18px * var(--scale)) calc(48px * var(--scale));
+    font-size: calc(1.6rem * var(--scale));
+    letter-spacing: 0.15em;
+
+    background: linear-gradient(145deg, #d97706, #b45309);
+    color: #fffdf5;
+
+    border-radius: calc(14px * var(--scale));
+    border: none;
+
     cursor: pointer;
     font-weight: bold;
-    z-index: 50;
-    transition: background-color 0.3s;
+    z-index: 100;
+
+    box-shadow: 0 calc(6px * var(--scale)) calc(12px * var(--scale)) rgba(0,0,0,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#next-paragraph-button:hover {
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 calc(10px * var(--scale)) calc(18px * var(--scale)) rgba(0,0,0,0.4);
 }
 
 #next-paragraph-button:disabled {
-    background-color: #9CA3AF;
+    background: #9ca3af;
     cursor: not-allowed;
+    box-shadow: none;
 }
+
+#trail-icon {
+    position: absolute;
+    bottom: calc(60px * var(--scale));
+    width: calc(90px * var(--scale));
+    height: calc(90px * var(--scale));
+
+    z-index: 8; /* メロスより後ろ */
+    pointer-events: none;
+}
+
+/* ===== ローディング画面 ===== */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: all;
+}
+
+#loading-text {
+    font-size: calc(2rem * var(--scale));
+    color: #fffdf5;
+    letter-spacing: 0.2em;
+    font-weight: bold;
+
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%   { opacity: 0.4; }
+    50%  { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
 </style>
 </head>
 
-<body>
+<body data-turn="{{ turn }}">
 
-<!-- 太陽 -->
 <img src="{{ url_for('static', filename='assets/backgrounds/sun_icon.png') }}"
      alt="太陽"
      class="sun-icon">
 
-<!-- 作文用紙 -->
 <div class="composition-paper" id="paper-viewport">
     <div id="story-container"></div>
 </div>
 
-<button id="next-paragraph-button" onclick="nextParagraph()">物語を読み込む...</button>
+<button id="next-paragraph-button" onclick="nextParagraph()">
+    物語を始める
+</button>
 
-<!-- ステージ -->
 <div class="stage-container">
     <div id="melos">
         <img src="{{ url_for('static', filename='assets/characters/Melos.png') }}"
@@ -140,9 +208,11 @@ body {
     </div>
 </div>
 
-<!-- BGM -->
+<!-- 追従アイコン -->
+<div id="trail-icon"></div>
+
 <audio id="bgm-player" loop>
-    <source src="{{ url_for('static', filename='assets/sounds/neutral.mp3') }}" type="audio/mpeg">
+    <source src="{{ url_for('static', filename='assets/sounds/' ~ (mood if mood else 'neutral') ~ '.mp3') }}" type="audio/mpeg">
 </audio>
 
 <script>
@@ -158,9 +228,10 @@ const nextButton = document.getElementById("next-paragraph-button");
 const melos = document.getElementById("melos");
 const bgmPlayer = document.getElementById("bgm-player");
 
-    const initialStory = ["メロスは激怒した。", 
-                          "必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
-                          "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"];
+const initialStory = [
+    "メロスは激怒した。\n必ずや、かの邪智暴虐の王を除かなければならぬと決意した。",
+    "走り出した瞬間、彼はまだ知らなかった。この道が、ひとつの物語だけでは終わらぬことを。"
+];
 
 function updateMelosPosition() {
     melosPositionX += 2;
@@ -198,19 +269,68 @@ function startTyping(text) {
     }, 80);
 }
 
+const trailIcon = document.getElementById("trail-icon");
+const chosenIcon = localStorage.getItem("chosenIcon");
+
+// アイコンがあれば表示
+if (chosenIcon) {
+    trailIcon.innerHTML = `
+        <img src="/static/assets/characters/${chosenIcon}"
+             style="width: 100%; height: 100%; object-fit: contain;">
+    `;
+}
+
+// 遅延用変数
+let trailX = -300;
+
+function updateMelosPosition() {
+    melosPositionX += 2;
+
+    if (melosPositionX > window.innerWidth) {
+        melosPositionX = -200;
+        trailX = -300;
+    }
+
+    melos.style.left = melosPositionX + "px";
+
+    // ★ 少し遅れて追従
+    trailX += (melosPositionX - trailX - 120) * 0.08;
+    trailIcon.style.left = trailX + "px";
+
+    requestAnimationFrame(updateMelosPosition);
+}
+
 window.nextParagraph = function () {
     if (bgmPlayer && bgmPlayer.paused) bgmPlayer.play().catch(() => {});
+
     if (!storyLoaded) return;
 
     if (currentParagraphIndex < storyData.length) {
         startTyping(storyData[currentParagraphIndex++]);
     } else {
         const turn = parseInt("{{ turn }}") || 1;
-        window.location.href = (turn >= 4)
-            ? "{{ url_for('ending') }}"
-            : "{{ url_for('game') }}";
+        const overlay = document.getElementById("loading-overlay");
+        const text = document.getElementById("loading-text");
+
+        // 表示文言を分岐
+        if (turn >= 4) {
+            text.textContent = "エンディングへ…";
+        } else {
+            text.textContent = "読み込み中…";
+        }
+
+        // ロード画面表示
+        overlay.style.display = "flex";
+
+        // 少し待ってから遷移（演出用）
+        setTimeout(() => {
+            window.location.href = (turn >= 4)
+                ? "{{ url_for('ending') }}"
+                : "{{ url_for('game') }}";
+        }, 600);
     }
 };
+
 
 async function loadStoryJson() {
     try {
@@ -243,7 +363,13 @@ async function loadStoryJson() {
 
 loadStoryJson();
 updateMelosPosition();
+
 </script>
+
+<!-- ===== ローディングオーバーレイ ===== -->
+<div id="loading-overlay">
+    <div id="loading-text">読み込み中…</div>
+</div>
 
 </body>
 </html>
